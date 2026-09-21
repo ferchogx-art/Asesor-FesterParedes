@@ -120,7 +120,7 @@ if prompt := st.chat_input("¿Qué duda técnica deseas validar?"):
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.0,
-                max_tokens=700,
+                max_tokens=1200,
             )
             response = completion.choices[0].message.content
             st.markdown(response)
