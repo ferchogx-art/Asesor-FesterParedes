@@ -1,12 +1,11 @@
 import streamlit as st
 import os
 import glob
-import re
 from groq import Groq
 
 st.set_page_config(page_title="Asesor Técnico Fester", page_icon="🏗️", layout="centered")
 st.title("🏗️ Asesor Técnico FesterParedes IA")
-st.write("Sistema experto con sondeo de obra y diagnóstico de ingeniería.")
+st.write("Sistema experto con consulta directa a fichas técnicas oficiales.")
 
 # 1. Conectar con la API de Groq usando tu modelo preferido
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
@@ -46,9 +45,9 @@ num_bloques = len(base_conocimiento)
 if num_bloques == 0:
     st.error("⚠️ ALERTA: No se detectaron PDFs en la raíz de GitHub.")
 else:
-    st.success(f"📊 Base de datos activa: Conectado a las fichas técnicas individuales ({num_bloques} páginas).")
+    st.success(f"📚 Base de datos activa: Conectado a las fichas técnicas individuales ({num_bloques} páginas).")
 
-# 3. Historial de chat en pantalla
+# 3. Historial de chat persistente (Memoria del Servidor)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -56,115 +55,100 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 4. Lógica del Asesor de Obra Ejecutivo con Filtro de Contexto Estricto
+# 4. Procesamiento de la Consulta
 if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto deseas validar?"):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Memoria de mensajes para mantener el hilo de la conversación
-    memoria_conversacion = ""
-    if len(st.session_state.messages) > 0:
-        memoria_conversacion = " ".join([m["content"] for m in st.session_state.messages[-2:]])
-    
+    # Guardamos la pregunta del usuario en el historial
     st.session_state.messages.append({"role": "user", "content": prompt})
     prompt_lower = prompt.lower()
-    contexto_completo = prompt_lower + " " + memoria_conversacion.lower()
+
+    # Recopilar todo el contexto platicado para saber de qué producto hablamos si la pregunta es corta
+    historial_texto = " ".join([m["content"] for m in st.session_state.messages[-3:]]).lower()
+
+    # REGLA ANCLA DE SONDEO PARA LA PALABRA AMBIGUA "ACRITON"
+    palabras_especificas_acriton = ["sellador", "proshield", "pro shield", "patching", "4", "6", "8", "12", "años", "anos", "rinde", "rendimiento", "aplicar"]
     
-    # Detectar si el usuario está exigiendo RENDIMIENTOS o DATOS ESPECÍFICOS
-    pide_rendimiento = any(x in prompt_lower for x in ["rinde", "rendimiento", "litros", "kilos", "cuanto", "cuánto", "dosis", "capas"])
-
-    # --- FILTROS DE ANÁLISIS DE CONTEXTO ---
-    es_muro_salitre = any(x in contexto_completo for x in ["muro", "pared", "salitre", "fachada", "sotano"])
-    es_techo_losa = any(x in contexto_completo for x in ["techo", "losa", "azotea", "lluvia", "gotera", "duradero", "azotera"])
-    es_charola = any(x in contexto_completo for x in ["charola", "baño", "zona humeda", "cl52", "cl-52", "regadera"])
-    es_terraza_cisterna = any(x in contexto_completo for x in ["terraza", "cisterna", "alberca", "espejo de agua", "cr66", "cr-66"])
-
-    solucion_maestra = ""
-
-    # COMPUERTA DE SEGURIDAD: Si pide rendimiento, NO uses el texto fijo. Obliga al sistema a leer el PDF técnico.
-    if not pide_rendimiento:
-        if prompt_lower.strip() in ["acriton", "quiero acriton", "necesito acriton", "me interesa acriton"]:
-            solucion_maestra = (
-                "Manejo tanto el **Fester Acriton Sellador** (primario acrílico para preparar la superficie) "
-                "como los impermeabilizantes premium **Fester Acriton Proshield Max** (con durabilidades de 4, 6, 8 y 12 años).\n\n"
-                "¿Cuál de los dos te interesa validar para tu proyecto?"
-            )
-        elif es_techo_losa:
-            solucion_maestra = (
-                "Para la humedad en el techo (losa) por lluvias, la recomendación oficial es la **Línea Fester A** "
-                "(disponible en 3, 5 y 7 años). Para un rango medio te sugiero **Fester A 5 Años Fibratado**, que rinde entre "
-                "1 a 1.5 Litros por m² a dos capas. \n\n"
-                "Por otra parte, contamos con los impermeabilizantes **Premium**, que son los **Acritones Proshield Max** "
-                "con durabilidad de 4, 6 y 8 años (así como la versión extrema de 12 años), los cuales ofrecen una tecnología avanzada "
-                "de poliuretano con excelente resistencia al movimiento estructural de las losas."
-            )
-        elif es_charola:
-            solucion_maestra = (
-                "Para impermeabilizar una **charola de baño o regadera (zonas húmedas)**, el producto oficial recomendado es **Fester CL-52**. "
-                "Es un impermeabilizante acrílico base agua de rápida aplicación, listo para usarse, que forma una capa elástica e impermeable antes de la colocación de azulejos o acabados."
-            )
-        elif es_muro_salitre:
-            solucion_maestra = (
-                "Para problemas de **humedad y salitre en muros o paredes**, la solución definitiva es la línea cementosa **Fester CR**:\n"
-                "- **Fester CR-65:** Opción económica estándar, requiere curado con agua durante 2 días seguidos.\n"
-                "- **Fester CR-66:** Opción premium elástica, bicomponente y NO necesita curado con agua."
-            )
-        elif es_terraza_cisterna:
-            solucion_maestra = (
-                "Para **terrazas, cisternas, albercas o espejos de agua**, el producto ideal es **Fester CR-66**.\n"
-                "⚠️ **REGLA DE ORO DE INGENIERÍA EN TERRAZAS:** Si la terraza es mayor a **25 metros cuadrados**, es de carácter OBLIGATORIO realizar **juntas de dilatación** en la superficie. Esto evitará que el producto se fisure y falle debido a los movimientos estructurales."
-            )
-
-    with st.chat_message("assistant"):
-        if solucion_maestra:
-            st.markdown(solucion_maestra)
-            st.session_state.messages.append({"role": "assistant", "content": solucion_maestra})
-        else:
-            # BÚSQUEDA DIRECTA EN LOS PDF CUANDO SE CONSULTAN RENDIMIENTOS O DETALLES AVANZADOS
-            contexto_manuales = ""
-            palabras = [p for p in prompt_lower.split() if len(p) > 2]
-            puntuaciones = []
+    if prompt_lower.strip() in ["acriton", "quiero acriton", "necesito acriton", "me interesa acriton"]:
+        respuesta_directa = (
+            "Manejo tanto el **Fester Acriton Sellador** (utilizado como primario para preparar la superficie) como la línea de "
+            "**Impermeabilizantes Premium Fester Acriton Pro Shield Max** (con durabilidades de 4, 6, 8 y 12 años). "
+            "¿Cuál de estos dos te interesa validar para tu proyecto?"
+        )
+        with st.chat_message("assistant"):
+            st.markdown(respuesta_directa)
+            st.session_state.messages.append({"role": "assistant", "content": respuesta_directa})
             
-            for item_doc in base_conocimiento:
-                texto_manual = item_doc["texto"].lower()
-                puntos = sum(4 for p in palabras if p in texto_manual)
-                # Si el usuario busca rendimiento y la página del PDF contiene la palabra rendimiento, le damos máxima prioridad
-                if pide_rendimiento and any(r in texto_manual for r in ["rendimiento", "rinde", "m²", "capa"]):
-                    puntos += 10
-                if puntos > 0:
-                    puntuaciones.append((puntos, item_doc))
+    else:
+        # BÚSQUEDA DIRECTA Y FILTRADA EN LAS FICHAS TÉCNICAS REALES
+        contexto_manuales = ""
+        palabras = [p for p in prompt_lower.split() if len(p) > 2]
+        
+        # Filtros de exclusión usando el historial acumulado para no perder el hilo del producto anterior
+        es_charola = any(x in historial_texto for x in ["charola", "baño", "regadera", "cl52", "cl-52", "muros de mi baño"])
+        es_salitre = any(x in historial_texto for x in ["salitre", "cr65", "cr66", "cr-65", "cr-66"])
+        es_techo = any(x in historial_texto for x in ["techo", "losa", "azotea", "lluvia", "proshield", "fester a", "azoteas"])
+        es_terraza = any(x in historial_texto for x in ["terraza", "alberca", "cisterna"])
+        
+        puntuaciones = []
+        for item_doc in base_conocimiento:
+            texto_manual = item_doc["texto"].lower()
+            nombre_archivo = item_doc["origen"].lower()
             
-            if puntuaciones:
-                puntuaciones.sort(key=lambda x: x[0], reverse=True)
-            
-            # Traemos las 3 páginas con mayor coincidencia exacta para que la IA tenga los números correctos
+            # Forzar coincidencia estricta con el archivo correcto según el historial de la plática
+            if es_charola and "cl" not in nombre_archivo and "cl52" not in texto_manual:
+                continue
+            if es_salitre and "cr" not in nombre_archivo:
+                continue
+            if es_techo and ("cr" in nombre_archivo or "cl" in nombre_archivo or "cf" in nombre_archivo):
+                continue
+                
+            puntos = sum(5 for p in palabras if p in texto_manual)
+            # Súper bono si las palabras clave del usuario coinciden con el nombre de la ficha técnica
+            if any(p in nombre_archivo for p in palabras):
+                puntos += 25
+                
+            if puntos > 0:
+                puntuaciones.append((puntos, item_doc))
+        
+        if puntuaciones:
+            puntuaciones.sort(key=lambda x: x[0], reverse=True)
             for puntos, res in puntuaciones[:3]:
-                contexto_manuales += f"\n[Ficha Técnica: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
+                contexto_manuales += f"\n[Ficha Oficial: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
 
-            mensaje_no_info = "No tengo esa información exacta de rendimiento, favor de comunicarse con un técnico especialista al **3317011786**."
+        mensaje_no_info = "No tengo esa información en las fichas, favor de comunicarse con un técnico especialista por ejemplo al **3317011786**, ellos te terminarán de atender con mucho gusto."
 
-            contexto_sistema = (
-                "Eres el Ingeniero Senior de Soporte Técnico de Fester México. Tu misión es extraer RENDIMIENTOS y DATOS EXACTOS de las fichas técnicas provistas.\n"
-                "REGLAS CRÍTICAS DE RESPUESTA:\n"
-                "1. Si el usuario te pregunta cuánto rinde un producto o sus capas, busca los números exactos (ej. kg/m², L/m²) en el texto de abajo y dilo de forma directa en la primera línea.\n"
-                "2. Sé muy breve y ejecutivo. No inventes datos. Cita estrictamente la ficha técnica y la página de donde sacaste el número.\n"
-                "3. Si el texto de abajo no contiene información coherente con el producto consultado, responde únicamente con el teléfono de asistencia técnica.\n\n"
-                f"TEXTO REAL EXTRAÍDO DE TU FICHA TÉCNICA EN GITHUB:\n{contexto_manuales}"
-            )
+        # PROMPT DE INSTRUCCIÓN TÉCNICA CON MEMORIA EN EL HISTORIAL DE COMPORTAMIENTO
+        contexto_sistema = (
+            "Eres el Ingeniero de Soporte Técnico Senior de Fester Paredes México.\n"
+            "Tu misión es leer el TEXTO OFICIAL de la ficha técnica adjunta y responder la duda del usuario de forma directa y ejecutiva.\n\n"
+            "REGLAS INALTERABLES:\n"
+            "1. BÁSATE ÚNICAMENTE en el texto adjunto abajo. No inventes componentes químicos ni tecnologías.\n"
+            "2. Si te preguntan por rendimiento o aplicación, busca los números exactos (ej. Litros/m², kg/m², capas) en el texto y dilo de inmediato en el primer párrafo.\n"
+            "3. Si el usuario te pregunta por una terraza mayor a 25 m² usando Fester CR-66, incluye OBLIGATORIAMENTE la advertencia sobre realizar juntas de dilatación para evitar fisuras.\n"
+            "4. Si el texto adjunto no contiene información útil para resolver la pregunta actual, responde exactamente con el mensaje de asistencia telefónica.\n\n"
+            f"TEXTO OFICIAL DE LA FICHA SELECCIONADA:\n{contexto_manuales if contexto_manuales else 'No se localizó la ficha correspondiente.'}"
+        )
 
+        with st.chat_message("assistant"):
             try:
+                # Construimos el paquete completo de mensajes incluyendo el historial para que la IA sepa el contexto
+                mensajes_ia = [{"role": "system", "content": contexto_sistema}]
+                for msg in st.session_state.messages[-4:]:  # Pasamos los últimos mensajes de la plática
+                    mensajes_ia.append({"role": msg["role"], "content": msg["content"]})
+
                 completion = client.chat.completions.create(
                     model=MODELO_FAVORITO,
-                    messages=[
-                        {"role": "system", "content": contexto_sistema},
-                        {"role": "user", "content": prompt}
-                    ],
+                    messages=mensajes_ia,
                     temperature=0.0,
-                    max_tokens=350,
+                    max_tokens=450,
                 )
                 response = completion.choices[0].message.content
                 st.markdown(response)
+                # Guardamos también la respuesta de la IA en el historial para amarrar la memoria
                 st.session_state.messages.append({"role": "assistant", "content": response})
             except Exception as e:
-                st.error(f"Error en motor IA ({MODELO_FAVORITO}): {e}")
+                st.error(f"Error en motor IA: {e}")
+
 
