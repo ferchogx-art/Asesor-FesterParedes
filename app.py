@@ -111,7 +111,7 @@ if prompt := st.chat_input("¿Qué rendimiento o producto deseas validar? o que 
     contexto_manuales = buscar_contexto(prompt, ultimo_contexto, base_conocimiento)
 
     contexto_sistema = (
-        "Eres el Asesor Técnico oficial de Fester México. Tu cliente es un ingeniero, arquitecto en obra, o cualquier persona que necesite ayuda con los productos fester.\n"
+        "Eres el Asesor oficial de Fester Paredes. Tu cliente es un ingeniero, arquitecto en obra, o cualquier persona que necesite ayuda con los productos fester.\n"
         "Reglas estrictas de comportamiento:\n"
         "1. Responde de forma clara y estructurada. Puedes usar viñetas o pasos numéricos si te piden aplicaciones.\n"
         "2. IMPORTANTE: Termina siempre tus ideas y oraciones por completo. No te cortes a la mitad.\n"
