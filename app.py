@@ -4,7 +4,7 @@ import glob
 from groq import Groq
 
 st.set_page_config(page_title="Asesor FesterParedes", page_icon="🏗️", layout="centered")
-st.title("🏗️ Asesor Técnico IA - Productos Fester")
+st.title("🏗️ Asesor Técnico FesterParedes IA - Productos Fester")
 
 # 1. Conectar con la API de Groq
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
