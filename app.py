@@ -61,89 +61,95 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Creamos un bloque de texto que junte los últimos mensajes para mantener la memoria del tema (ej. azotea)
+    # Memoria de mensajes para mantener el hilo de la conversación
     memoria_conversacion = ""
     if len(st.session_state.messages) > 0:
-        memoria_conversacion = " ".join([m["content"] for m in st.session_state.messages[-3:]])
+        memoria_conversacion = " ".join([m["content"] for m in st.session_state.messages[-2:]])
     
     st.session_state.messages.append({"role": "user", "content": prompt})
     prompt_lower = prompt.lower()
-    contexto_busqueda = prompt_lower + " " + memoria_conversacion.lower()
+    contexto_completo = prompt_lower + " " + memoria_conversacion.lower()
     
-    # --- FILTROS DE ANÁLISIS DE CONTEXTO MEJORADOS ---
-    es_muro_salitre = any(x in contexto_busqueda for x in ["muro", "pared", "salitre", "fachada", "sotano"])
-    es_techo_losa = any(x in contexto_busqueda for x in ["techo", "losa", "azotea", "lluvia", "gotera", "duradero", "azotera"])
-    es_charola = any(x in contexto_busqueda for x in ["charola", "baño", "zona humeda", "cl52", "cl-52"])
-    es_terraza_cisterna = any(x in contexto_busqueda for x in ["terraza", "cisterna", "alberca", "espejo de agua", "cr66", "cr-66"])
+    # Detectar si el usuario está exigiendo RENDIMIENTOS o DATOS ESPECÍFICOS
+    pide_rendimiento = any(x in prompt_lower for x in ["rinde", "rendimiento", "litros", "kilos", "cuanto", "cuánto", "dosis", "capas"])
+
+    # --- FILTROS DE ANÁLISIS DE CONTEXTO ---
+    es_muro_salitre = any(x in contexto_completo for x in ["muro", "pared", "salitre", "fachada", "sotano"])
+    es_techo_losa = any(x in contexto_completo for x in ["techo", "losa", "azotea", "lluvia", "gotera", "duradero", "azotera"])
+    es_charola = any(x in contexto_completo for x in ["charola", "baño", "zona humeda", "cl52", "cl-52", "regadera"])
+    es_terraza_cisterna = any(x in contexto_completo for x in ["terraza", "cisterna", "alberca", "espejo de agua", "cr66", "cr-66"])
 
     solucion_maestra = ""
 
-    # REGLA DE ORO 1: ¿Dijo Acriton a secas? Forzar sondeo para no asumir producto erróneo
-    if prompt_lower.strip() in ["acriton", "quiero acriton", "necesito acriton", "me interesa acriton"]:
-        solucion_maestra = (
-            "Manejo tanto el **Fester Acriton Sellador** (primario acrílico para preparar la superficie) "
-            "como los impermeabilizantes premium **Fester Acriton Proshield Max** (con durabilidades de 4, 6, 8 y 12 años).\n\n"
-            "¿Cuál de los dos te interesa validar para tu proyecto?"
-        )
-    
-    # REGLA DE ORO 2: Mensaje unificado e impecable de techos (Económico + Premium combinado)
-    elif es_techo_losa:
-        solucion_maestra = (
-            "Para la humedad en el techo (losa) por lluvias, la recomendación oficial es la **Línea Fester A** "
-            "(disponible en 3, 5 y 7 años). Para un rango medio te sugiero **Fester A 5 Años Fibratado**, que rinde entre "
-            "1 a 1.5 Litros por m² a dos capas. \n\n"
-            "Por otra parte, contamos con los impermeabilizantes **Premium**, que son los **Acritones Proshield Max** "
-            "con durabilidad de 4, 6 y 8 años (así como la versión extrema de 12 años), los cuales ofrecen una tecnología avanzada "
-            "de poliuretano con excelente resistencia al movimiento estructural de las losas."
-        )
-    elif es_charola:
-        solucion_maestra = (
-            "Para impermeabilizar una **charola de baño o zonas húmedas**, el producto oficial recomendado es **Fester CL-52**. "
-            "Es un impermeabilizante cementoso elástico de rápida aplicación que evita filtraciones entre pisos."
-        )
-    elif es_muro_salitre:
-        solucion_maestra = (
-            "Para problemas de **humedad y salitre en muros o paredes**, la solución definitiva es la línea cementosa **Fester CR**:\n"
-            "- **Fester CR-65:** Opción económica estándar, requiere curado con agua durante 2 días seguidos.\n"
-            "- **Fester CR-66:** Opción premium elástica, bicomponente y NO necesita curado con agua."
-        )
-    elif es_terraza_cisterna:
-        solucion_maestra = (
-            "Para **terrazas, cisternas, albercas o espejos de agua**, el producto ideal es **Fester CR-66**.\n"
-            "⚠️ **REGLA DE ORO DE INGENIERÍA EN TERRAZAS:** Si la terraza es mayor a **25 metros cuadrados**, es de carácter OBLIGATORIO realizar **juntas de dilatación** en la superficie. Esto evitará que el producto se fisure y falle debido a los movimientos estructurales."
-        )
+    # COMPUERTA DE SEGURIDAD: Si pide rendimiento, NO uses el texto fijo. Obliga al sistema a leer el PDF técnico.
+    if not pide_rendimiento:
+        if prompt_lower.strip() in ["acriton", "quiero acriton", "necesito acriton", "me interesa acriton"]:
+            solucion_maestra = (
+                "Manejo tanto el **Fester Acriton Sellador** (primario acrílico para preparar la superficie) "
+                "como los impermeabilizantes premium **Fester Acriton Proshield Max** (con durabilidades de 4, 6, 8 y 12 años).\n\n"
+                "¿Cuál de los dos te interesa validar para tu proyecto?"
+            )
+        elif es_techo_losa:
+            solucion_maestra = (
+                "Para la humedad en el techo (losa) por lluvias, la recomendación oficial es la **Línea Fester A** "
+                "(disponible en 3, 5 y 7 años). Para un rango medio te sugiero **Fester A 5 Años Fibratado**, que rinde entre "
+                "1 a 1.5 Litros por m² a dos capas. \n\n"
+                "Por otra parte, contamos con los impermeabilizantes **Premium**, que son los **Acritones Proshield Max** "
+                "con durabilidad de 4, 6 y 8 años (así como la versión extrema de 12 años), los cuales ofrecen una tecnología avanzada "
+                "de poliuretano con excelente resistencia al movimiento estructural de las losas."
+            )
+        elif es_charola:
+            solucion_maestra = (
+                "Para impermeabilizar una **charola de baño o regadera (zonas húmedas)**, el producto oficial recomendado es **Fester CL-52**. "
+                "Es un impermeabilizante acrílico base agua de rápida aplicación, listo para usarse, que forma una capa elástica e impermeable antes de la colocación de azulejos o acabados."
+            )
+        elif es_muro_salitre:
+            solucion_maestra = (
+                "Para problemas de **humedad y salitre en muros o paredes**, la solución definitiva es la línea cementosa **Fester CR**:\n"
+                "- **Fester CR-65:** Opción económica estándar, requiere curado con agua durante 2 días seguidos.\n"
+                "- **Fester CR-66:** Opción premium elástica, bicomponente y NO necesita curado con agua."
+            )
+        elif es_terraza_cisterna:
+            solucion_maestra = (
+                "Para **terrazas, cisternas, albercas o espejos de agua**, el producto ideal es **Fester CR-66**.\n"
+                "⚠️ **REGLA DE ORO DE INGENIERÍA EN TERRAZAS:** Si la terraza es mayor a **25 metros cuadrados**, es de carácter OBLIGATORIO realizar **juntas de dilatación** en la superficie. Esto evitará que el producto se fisure y falle debido a los movimientos estructurales."
+            )
 
     with st.chat_message("assistant"):
         if solucion_maestra:
             st.markdown(solucion_maestra)
             st.session_state.messages.append({"role": "assistant", "content": solucion_maestra})
         else:
-            # Búsqueda de respaldo en las fichas individuales si es algo muy específico o un saludo genérico
+            # BÚSQUEDA DIRECTA EN LOS PDF CUANDO SE CONSULTAN RENDIMIENTOS O DETALLES AVANZADOS
             contexto_manuales = ""
             palabras = [p for p in prompt_lower.split() if len(p) > 2]
             puntuaciones = []
             
             for item_doc in base_conocimiento:
                 texto_manual = item_doc["texto"].lower()
-                puntos = sum(3 for p in palabras if p in texto_manual)
+                puntos = sum(4 for p in palabras if p in texto_manual)
+                # Si el usuario busca rendimiento y la página del PDF contiene la palabra rendimiento, le damos máxima prioridad
+                if pide_rendimiento and any(r in texto_manual for r in ["rendimiento", "rinde", "m²", "capa"]):
+                    puntos += 10
                 if puntos > 0:
                     puntuaciones.append((puntos, item_doc))
             
             if puntuaciones:
-                puntuaciones.sort(key=lambda x: x, reverse=True)
+                puntuaciones.sort(key=lambda x: x[0], reverse=True)
             
-            for puntos, res in puntuaciones[:2]:
-                contexto_manuales += f"\n[Ficha: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
+            # Traemos las 3 páginas con mayor coincidencia exacta para que la IA tenga los números correctos
+            for puntos, res in puntuaciones[:3]:
+                contexto_manuales += f"\n[Ficha Técnica: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
 
-            # MENSAJE DE RESPALDO CON TU TELÉFONO OFICIAL DE ASISTENCIA
-            mensaje_no_info = "No tengo esa información, favor de comunicarse con un técnico especialista por ejemplo al **3317011786**, ellos te terminarán de atender con mucho gusto."
+            mensaje_no_info = "No tengo esa información exacta de rendimiento, favor de comunicarse con un técnico especialista al **3317011786**."
 
             contexto_sistema = (
-                "Eres el Asesor Técnico Ejecutivo de Fester México.\n"
-                "Responde de forma resumida en máximo 1 o 2 párrafos cortos. Ve directo al grano.\n"
-                "Si te saludan (como un 'hola'), responde de forma amable preguntando en qué producto o problema de obra puedes ayudar hoy.\n"
-                f"REGLA CRÍTICA: Si el usuario te pregunta por un producto técnico que no está en las fichas o es de otra marca, responde EXACTAMENTE lo siguiente: '{mensaje_no_info}'\n\n"
-                f"TEXTO OFICIAL DE LA FICHA INDIVIDUAL:\n{contexto_manuales}"
+                "Eres el Ingeniero Senior de Soporte Técnico de Fester México. Tu misión es extraer RENDIMIENTOS y DATOS EXACTOS de las fichas técnicas provistas.\n"
+                "REGLAS CRÍTICAS DE RESPUESTA:\n"
+                "1. Si el usuario te pregunta cuánto rinde un producto o sus capas, busca los números exactos (ej. kg/m², L/m²) en el texto de abajo y dilo de forma directa en la primera línea.\n"
+                "2. Sé muy breve y ejecutivo. No inventes datos. Cita estrictamente la ficha técnica y la página de donde sacaste el número.\n"
+                "3. Si el texto de abajo no contiene información coherente con el producto consultado, responde únicamente con el teléfono de asistencia técnica.\n\n"
+                f"TEXTO REAL EXTRAÍDO DE TU FICHA TÉCNICA EN GITHUB:\n{contexto_manuales}"
             )
 
             try:
