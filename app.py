@@ -95,7 +95,8 @@ if prompt := st.chat_input("¿Qué producto Fester deseas consultar o qué probl
     with st.chat_message("assistant"):
         try:
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.3-70b-specdec",
+
                 messages=[
                     {"role": "system", "content": contexto_sistema},
                     *st.session_state.messages
