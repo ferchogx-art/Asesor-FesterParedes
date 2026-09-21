@@ -123,8 +123,9 @@ if prompt := st.chat_input("¿Qué duda técnica deseas validar?"):
                 temperature=0.0,  # Cero tolerancia a inventar o aproximar datos
                 max_tokens=700,
             )
-            response = completion.choices.message.content
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+           response = completion.choices[0].message.content
+st.markdown(response)
+st.session_state.messages.append({"role": "assistant", "content": response})
+
         except Exception as e:
             st.error(f"Error: {e}")
