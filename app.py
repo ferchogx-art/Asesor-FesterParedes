@@ -123,7 +123,8 @@ if prompt := st.chat_input("¿Qué rendimiento o producto deseas validar? o que 
     with st.chat_message("assistant"):
         try:
             completion = client.chat.completions.create(
-                model="llama-3.1-8b",
+                model="openai/gpt-oss-120b",
+
                 messages=[
                     {"role": "system", "content": contexto_sistema},
                     {"role": "user", "content": prompt}
