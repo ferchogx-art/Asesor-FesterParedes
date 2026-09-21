@@ -168,7 +168,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
 
             try:
                 completion = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
+                    model="openai/gpt-oss-120b",
                     messages=[
                         {"role": "system", "content": contexto_sistema},
                         {"role": "user", "content": prompt}
