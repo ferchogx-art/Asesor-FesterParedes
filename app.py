@@ -78,7 +78,7 @@ def buscar_contexto(pregunta, base, k=3):
         if puntos > 0:
             puntuaciones.append((puntos, item))
             
-    puntuaciones.sort(key=lambda x: x, reverse=True)
+    puntuaciones.sort(key=lambda x: x[0], reverse=True)
     
     contexto_formateado = ""
     for puntos, res in puntuaciones[:k]:
