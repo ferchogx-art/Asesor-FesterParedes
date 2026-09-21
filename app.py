@@ -3,8 +3,8 @@ import os
 import glob
 from groq import Groq
 
-st.set_page_config(page_title="Asesor Técnico Fester", page_icon="🏗️", layout="centered")
-st.title("🏗️ Asesor Técnico IA - Productos Fester")
+st.set_page_config(page_title="Asesor Técnico FesterParedes", page_icon="🏗️", layout="centered")
+st.title("🏗️ Asesor Fester Paredes IA - Productos Fester")
 st.write("Filtro técnico avanzado para evitar mezclas de productos acrílicos, asfálticos y cementosos.")
 
 # 1. Conectar con la API de Groq
@@ -114,7 +114,7 @@ if prompt := st.chat_input("¿Qué duda técnica deseas validar?"):
     with st.chat_message("assistant"):
         try:
             completion = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="openai/gpt-oss-120b",
                 messages=[
                     {"role": "system", "content": contexto_sistema},
                     {"role": "user", "content": prompt}
