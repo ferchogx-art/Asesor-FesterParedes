@@ -4,9 +4,9 @@ import glob
 import re
 from groq import Groq
 
-st.set_page_config(page_title="Asesor Técnico Fester", page_icon="🏗️", layout="centered")
-st.title("🏗️ Asesor Técnico FesterParedes IA")
-st.write("Respuestas ejecutivas inmediatas para ingenieros en obra basadas en tu criterio comercial.")
+st.set_page_config(page_title="Asesor Fester Paredes", page_icon="🏗️", layout="centered")
+st.title("🏗️ Asesor Técnico Fester Paredes IA")
+st.write("Estoy para apoyar en lo mas que se pueda🤓.")
 
 # 1. Conectar con la API de Groq
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
@@ -24,24 +24,24 @@ TU_CONOCIMIENTO = [
         "claves": ["charola", "baño", "zona humeda", "cl52", "cl-52"],
         "respuesta": (
             "Para impermeabilizar una **charola de baño o zonas húmedas**, el producto recomendado es **Fester CL-52**. "
-            "Es un impermeabilizante cementoso elástico de rápida aplicación que evita filtraciones entre pisos. "
+            "Es un impermeabilizante monocomponente elástico de rápida aplicación que evita filtraciones hacia los muros. "
             "El rendimiento exacto se extrae directamente de la ficha técnica según las condiciones de la superficie."
         )
     },
     {
-        "claves": ["salitre", "humedad", "pared", "muro", "cr65", "cr66", "cr-65", "cr-66"],
+        "claves": ["salitre", "humedad", "pared", "muro", "cr65", "cr-65",],
         "respuesta": (
             "Para problemas de **humedad y salitre en muros o paredes**, la solución definitiva es la línea cementosa **Fester CR**. "
             "La elección depende de la urgencia de la obra:\n"
             "- **Fester CR-65:** Opción económica estándar, pero requiere un proceso obligatorio de curado con agua durante 2 días seguidos.\n"
-            "- **Fester CR-66:** Opción premium y rápida. Es bicomponente, elástico y NO necesita curado con agua, lo que permite avanzar de inmediato con los acabados."
+            "- **Fester CR-66:** Opción premium y rápida. Cementoso de dos componentes, elástico y NO necesita curado con agua, lo que permite avanzar de inmediato con los acabados."
         )
     },
     {
         "claves": ["usos multiples", "fortificar", "mezcla", "concreto", "mortero", "festerbond"],
         "respuesta": (
             "Si necesitas un sellador de **usos múltiples o un aditivo para fortificar mezclas**, el producto ideal es **Festerbond**.\n"
-            "- **Uso:** Funciona como unión de concreto nuevo a viejo, fortificador de morteros, lechadas y sellador de porocidad.\n"
+            "- **Uso:** Funciona como unión de concreto nuevo a viejo no estructural, fortificador de morteros, lechadas y sellador de porocidad.\n"
             "- **Rendimiento:** Se saca de la ficha técnica ya que varía según la dilución de agua requerida para la mezcla."
         )
     },
@@ -66,7 +66,7 @@ TU_CONOCIMIENTO = [
         "claves": ["muchos años", "premium", "alta calidad", "duradero", "acriton", "4 años", "6 años", "8 años", "12 años"],
         "respuesta": (
             "Si el cliente busca una protección que **dure muchos años** con máxima calidad, se debe recomendar la línea premium: **Fester Acriton**.\n"
-            "- Son impermeabilizantes acrílicos con tecnología avanzada de poliuretano.\n"
+            "- Son impermeabilizantes acrílicos con tecnología avanzada en secado rapido.\n"
             "- Disponibles en garantías extremas de **4, 6, 8 y hasta 12 años**, ofreciendo excelente resistencia al movimiento de las losas."
         )
     },
@@ -158,17 +158,17 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
                 contexto_manuales += f"\n[Ficha Técnica: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
 
             contexto_sistema = (
-                "Eres el Asesor Técnico Ejecutivo de Fester México.\n"
+                "Eres el Asesor Técnico Ejecutivo de Fester Paredes.\n"
                 "REGLAS OBLIGATORIAS DE REDACCIÓN:\n"
                 "1. Responde de forma resumida en máximo 1 o 2 párrafos cortos. Ve directo al grano.\n"
                 "2. Usa exclusivamente los datos técnicos de la ficha provista abajo para evitar mezclar líneas.\n"
-                "3. Si la ficha técnica no contiene el dato, di: 'No dispongo del rendimiento exacto en esta ficha, favor de validar catálogo físico.'\n\n"
+                "3. Si la ficha técnica no contiene el dato, di: 'No dispongo del rendimiento exacto en esta ficha, favor de comunicarse al tel : 3317011786.'\n\n"
                 f"TEXTO OFICIAL DE LA FICHA INDIVIDUAL:\n{contexto_manuales}"
             )
 
             try:
                 completion = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
+                    model="openai/gpt-oss-120b",
                     messages=[
                         {"role": "system", "content": contexto_sistema},
                         {"role": "user", "content": prompt}
