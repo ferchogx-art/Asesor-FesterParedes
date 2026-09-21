@@ -78,10 +78,9 @@ def buscar_contexto(pregunta, base, k=3):
         if puntos > 0:
             puntuaciones.append((puntos, item))
             
-    puntuaciones.sort(key=lambda x: x[0], reverse=True)
+    puntuaciones.sort(key=lambda x: x, reverse=True)
     
     contexto_formateado = ""
-    paginas_incluidas = set()
     for puntos, res in puntuaciones[:k]:
         contexto_formateado += f"\n[PÁGINA OFICIAL: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
     return contexto_formateado
@@ -103,7 +102,7 @@ if prompt := st.chat_input("¿Qué duda técnica deseas validar?"):
     contexto_manuales = buscar_contexto(prompt, base_conocimiento)
 
     contexto_sistema = (
-        "Eres el Ingeniero de Soporte Técnico Senior de Fester México. Tu misión es dar instrucciones de obra IMPECABLES y SIN ERRORES.\n"
+        "Eres el Ingeniero de Soporte Técnico Senior de Fester Paredes. Tu misión es dar instrucciones de obra IMPECABLES y SIN ERRORES.\n"
         "REGLAS DE SEGURIDAD CONTRA CONFUSIONES:\n"
         "1. Los sistemas ACRÍLICOS (Fester Acriton, Fester A3/A5/A7) se imprimen EXCLUSIVAMENTE con 'Fester Acriton Sellador' (Rendimiento 5 m²/L) y se aplican a razón de 1 a 1.5 Litros por m² en total (NUNCA 8 o 9 m² por litro).\n"
         "2. El 'Fester Hidroprimer' y 'Vaportite 550' pertenecen al sistema ASFÁLTICO. NUNCA los mezcles ni los recomiendes en un proceso acrílico.\n"
@@ -112,7 +111,7 @@ if prompt := st.chat_input("¿Qué duda técnica deseas validar?"):
         f"TEXTO ESTRICTO DE LAS PÁGINAS SELECCIONADAS:\n{contexto_manuales}"
     )
 
-      with st.chat_message("assistant"):
+    with st.chat_message("assistant"):
         try:
             completion = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
