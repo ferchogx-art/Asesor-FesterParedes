@@ -95,7 +95,8 @@ if prompt := st.chat_input("¿Qué producto Fester deseas consultar o qué probl
     with st.chat_message("assistant"):
         try:
             completion = client.chat.completions.create(
-              model="llama-3.3-70b-versatile",
+              model="openai/gpt-oss-120b",
+
 
 
                 messages=[
