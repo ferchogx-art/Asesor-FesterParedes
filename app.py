@@ -156,7 +156,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
                     temperature=0.0,
                     max_tokens=350,
                 )
-                response = completion.choices.message.content
+                response = completion.choices[0].message.content
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
             except Exception as e:
