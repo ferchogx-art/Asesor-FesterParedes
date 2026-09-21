@@ -112,7 +112,8 @@ if prompt := st.chat_input("¿Qué rendimiento o producto deseas validar? o que 
         try:
             # Usamos el modelo ultra rápido, gratuito y 100% vigente de Groq
             completion = client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="llama-3.3-70b-versatile",
+
                 messages=[
                     {"role": "system", "content": contexto_sistema},
                     {"role": "user", "content": prompt}
