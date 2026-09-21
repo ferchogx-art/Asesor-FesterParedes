@@ -105,7 +105,7 @@ if prompt := st.chat_input("¿Qué producto Fester deseas consultar o qué probl
                 ],
                 temperature=0.2,
             )
-            response = completion.choices.message.content
+            response = completion.choices[0].message.content
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as e:
