@@ -14,7 +14,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-MODELO_FAVORITO = "llama-3.1-8b-instant"
+MODELO_FAVORITO = "openai/gpt-oss-120b"
  # Cambiado al modelo estable oficial para evitar bloqueos
 
 # 2. Carga inteligente de fichas técnicas en formato PDF (Sueltas en GitHub)
