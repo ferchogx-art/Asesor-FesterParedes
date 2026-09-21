@@ -90,7 +90,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # 5. Entrada del usuario y respuesta ejecutiva de la IA
-if prompt := st.chat_input("¿Qué rendimiento o producto deseas validar?"):
+if prompt := st.chat_input("¿Qué rendimiento o producto deseas validar? o que situacion de humedad tienes?"):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
