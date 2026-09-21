@@ -112,20 +112,19 @@ if prompt := st.chat_input("¿Qué duda técnica deseas validar?"):
         f"TEXTO ESTRICTO DE LAS PÁGINAS SELECCIONADAS:\n{contexto_manuales}"
     )
 
-    with st.chat_message("assistant"):
+      with st.chat_message("assistant"):
         try:
             completion = client.chat.completions.create(
-                model="openai/gpt-oss-120b",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": contexto_sistema},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.0,  # Cero tolerancia a inventar o aproximar datos
+                temperature=0.0,
                 max_tokens=700,
             )
-           response = completion.choices[0].message.content
-st.markdown(response)
-st.session_state.messages.append({"role": "assistant", "content": response})
-
+            response = completion.choices[0].message.content
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as e:
             st.error(f"Error: {e}")
