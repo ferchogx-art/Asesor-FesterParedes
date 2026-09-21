@@ -116,7 +116,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
                     puntuaciones.append((puntos, item_doc))
             
             if puntuaciones:
-                puntuaciones.sort(key=lambda x: x, reverse=True)
+                puntuaciones.sort(key=lambda x: x[0], reverse=True)
             
             for puntos, res in puntuaciones[:2]:
                 contexto_manuales += f"\n[Ficha: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
