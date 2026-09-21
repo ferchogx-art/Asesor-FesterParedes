@@ -48,7 +48,7 @@ if num_bloques == 0:
 else:
     st.success(f"📊 Base de datos activa: Conectado a las fichas técnicas individuales ({num_bloques} páginas).")
 
-# 3. Historial
+# 3. Historial de chat en pantalla
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -60,19 +60,43 @@ for message in st.session_state.messages:
 if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto deseas validar?"):
     with st.chat_message("user"):
         st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-    prompt_lower = prompt.lower()
     
-    # --- FILTRO MAESTRO DE ANÁLISIS DE CONTEXTO ---
-    es_muro_salitre = any(x in prompt_lower for x in ["muro", "pared", "salitre", "fachada", "sotano"])
-    es_techo_losa = any(x in prompt_lower for x in ["techo", "losa", "azotea", "lluvia", "gotera"])
-    es_charola = any(x in prompt_lower for x in ["charola", "baño", "zona humeda", "cl52", "cl-52"])
-    es_terraza_cisterna = any(x in prompt_lower for x in ["terraza", "cisterna", "alberca", "espejo de agua", "cr66", "cr-66"])
+    # Creamos un bloque de texto que junte los últimos mensajes para mantener la memoria del tema (ej. azotea)
+    memoria_conversacion = ""
+    if len(st.session_state.messages) > 0:
+        memoria_conversacion = " ".join([m["content"] for m in st.session_state.messages[-3:]])
+    
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    prompt_lower = prompt.lower()
+    contexto_busqueda = prompt_lower + " " + memoria_conversacion.lower()
+    
+    # --- FILTROS DE ANÁLISIS DE CONTEXTO MEJORADOS ---
+    es_muro_salitre = any(x in contexto_busqueda for x in ["muro", "pared", "salitre", "fachada", "sotano"])
+    es_techo_losa = any(x in contexto_busqueda for x in ["techo", "losa", "azotea", "lluvia", "gotera", "duradero", "azotera"])
+    es_charola = any(x in contexto_busqueda for x in ["charola", "baño", "zona humeda", "cl52", "cl-52"])
+    es_terraza_cisterna = any(x in contexto_busqueda for x in ["terraza", "cisterna", "alberca", "espejo de agua", "cr66", "cr-66"])
 
     solucion_maestra = ""
 
-    if es_charola:
+    # REGLA DE ORO 1: ¿Dijo Acriton a secas? Forzar sondeo para no asumir producto erróneo
+    if prompt_lower.strip() in ["acriton", "quiero acriton", "necesito acriton", "me interesa acriton"]:
+        solucion_maestra = (
+            "Manejo tanto el **Fester Acriton Sellador** (primario acrílico para preparar la superficie) "
+            "como los impermeabilizantes premium **Fester Acriton Proshield Max** (con durabilidades de 4, 6, 8 y 12 años).\n\n"
+            "¿Cuál de los dos te interesa validar para tu proyecto?"
+        )
+    
+    # REGLA DE ORO 2: Mensaje unificado e impecable de techos (Económico + Premium combinado)
+    elif es_techo_losa:
+        solucion_maestra = (
+            "Para la humedad en el techo (losa) por lluvias, la recomendación oficial es la **Línea Fester A** "
+            "(disponible en 3, 5 y 7 años). Para un rango medio te sugiero **Fester A 5 Años Fibratado**, que rinde entre "
+            "1 a 1.5 Litros por m² a dos capas. \n\n"
+            "Por otra parte, contamos con los impermeabilizantes **Premium**, que son los **Acritones Proshield Max** "
+            "con durabilidad de 4, 6 y 8 años (así como la versión extrema de 12 años), los cuales ofrecen una tecnología avanzada "
+            "de poliuretano con excelente resistencia al movimiento estructural de las losas."
+        )
+    elif es_charola:
         solucion_maestra = (
             "Para impermeabilizar una **charola de baño o zonas húmedas**, el producto oficial recomendado es **Fester CL-52**. "
             "Es un impermeabilizante cementoso elástico de rápida aplicación que evita filtraciones entre pisos."
@@ -88,23 +112,13 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
             "Para **terrazas, cisternas, albercas o espejos de agua**, el producto ideal es **Fester CR-66**.\n"
             "⚠️ **REGLA DE ORO DE INGENIERÍA EN TERRAZAS:** Si la terraza es mayor a **25 metros cuadrados**, es de carácter OBLIGATORIO realizar **juntas de dilatación** en la superficie. Esto evitará que el producto se fisure y falle debido a los movimientos estructurales."
         )
-    elif es_techo_losa:
-        if any(x in prompt_lower for x in ["4", "4 años", "6", "6 años", "8", "8 años", "12", "12 años", "premium", "muchos años"]):
-            solucion_maestra = (
-                "Para la **humedad en el techo (losa) por lluvias** donde buscas máxima calidad y que dure muchos años, se recomienda la línea premium **Fester Acriton** (disponible en 4, 6, 8 y 12 años). Son acrílicos con tecnología de poliuretano de alta resistencia."
-            )
-        else:
-            solucion_maestra = (
-                "Para la **humedad en el techo (losa) por lluvias** con un presupuesto limitado, la recomendación oficial es la **Línea Fester A** (disponible en 3, 5 y 7 años). "
-                "Para un rango medio te sugiero **Fester A 5 Años Fibratado**, que rinde entre 1 a 1.5 Litros por m² a dos capas."
-            )
 
     with st.chat_message("assistant"):
         if solucion_maestra:
             st.markdown(solucion_maestra)
             st.session_state.messages.append({"role": "assistant", "content": solucion_maestra})
         else:
-            # Búsqueda de respaldo en las fichas individuales si es algo muy específico o un saludo
+            # Búsqueda de respaldo en las fichas individuales si es algo muy específico o un saludo genérico
             contexto_manuales = ""
             palabras = [p for p in prompt_lower.split() if len(p) > 2]
             puntuaciones = []
@@ -116,7 +130,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
                     puntuaciones.append((puntos, item_doc))
             
             if puntuaciones:
-                puntuaciones.sort(key=lambda x: x[0], reverse=True)
+                puntuaciones.sort(key=lambda x: x, reverse=True)
             
             for puntos, res in puntuaciones[:2]:
                 contexto_manuales += f"\n[Ficha: {res['origen']} - {res['referencia']}]\n{res['texto']}\n"
@@ -142,8 +156,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
                     temperature=0.0,
                     max_tokens=350,
                 )
-                # Extracción corregida agregando [0] para el modelo openai/gpt-oss-120b
-                response = completion.choices[0].message.content
+                response = completion.choices.message.content
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
             except Exception as e:
