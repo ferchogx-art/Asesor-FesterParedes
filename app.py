@@ -104,7 +104,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
             st.markdown(solucion_maestra)
             st.session_state.messages.append({"role": "assistant", "content": solucion_maestra})
         else:
-            # Búsqueda de respaldo en las fichas individuales si es algo muy específico
+            # Búsqueda de respaldo en las fichas individuales si es algo muy específico o un saludo
             contexto_manuales = ""
             palabras = [p for p in prompt_lower.split() if len(p) > 2]
             puntuaciones = []
@@ -127,7 +127,8 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
             contexto_sistema = (
                 "Eres el Asesor Técnico Ejecutivo de Fester México.\n"
                 "Responde de forma resumida en máximo 1 o 2 párrafos cortos. Ve directo al grano.\n"
-                f"REGLA CRÍTICA: Si el texto provisto abajo no tiene relación lógica con la consulta del usuario o no contiene la respuesta, debes responder EXACTAMENTE lo siguiente: '{mensaje_no_info}'\n\n"
+                "Si te saludan (como un 'hola'), responde de forma amable preguntando en qué producto o problema de obra puedes ayudar hoy.\n"
+                f"REGLA CRÍTICA: Si el usuario te pregunta por un producto técnico que no está en las fichas o es de otra marca, responde EXACTAMENTE lo siguiente: '{mensaje_no_info}'\n\n"
                 f"TEXTO OFICIAL DE LA FICHA INDIVIDUAL:\n{contexto_manuales}"
             )
 
@@ -141,8 +142,8 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
                     temperature=0.0,
                     max_tokens=350,
                 )
-                # Extracción corregida accediendo al índice  para el modelo openai/gpt-oss-120b
-                response = completion.choices.message.content
+                # Extracción corregida agregando [0] para el modelo openai/gpt-oss-120b
+                response = completion.choices[0].message.content
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
             except Exception as e:
