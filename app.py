@@ -204,7 +204,7 @@ TEXTO OFICIAL RECUPERADO:
             model=MODELO_FAVORITO,
             messages=mensajes_ia,
             temperature=0.0,
-            max_tokens=600,
+            max_tokens=2000,
         )
         respuesta = completion.choices[0].message.content
         guardar_respuesta(respuesta)
