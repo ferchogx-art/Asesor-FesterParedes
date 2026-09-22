@@ -15,7 +15,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-MODELO_FAVORITO = "llama3-70b-8192"
+MODELO_FAVORITO = "openai/gpt-oss-120b""
 
 # 2. Inicializar memorias en el servidor
 if "messages" not in st.session_state:
