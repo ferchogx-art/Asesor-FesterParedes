@@ -6,7 +6,7 @@ from groq import Groq
 
 st.set_page_config(page_title="Asesor Técnico Fester", page_icon="🏗️", layout="centered")
 st.title("🏗️ Asesor Técnico FesterParedes IA")
-st.write("Sistema experto con buscador flexible y aprendizaje en vivo.")
+st.write("Sistema experto con buscador por código de producto y aprendizaje activo.")
 
 # 1. Conectar con la API de Groq
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
@@ -17,11 +17,11 @@ if not api_key:
 client = Groq(api_key=api_key)
 MODELO_FAVORITO = "openai/gpt-oss-120b"
 
-# 2. Inicializar memorias persistentes en el servidor
+# 2. Inicializar memorias en el servidor
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "memoria_aprendizaje" not in st.session_state:
-    st.session_state.memoria_aprendizaje = {}  # Guarda tus lecciones en vivo
+    st.session_state.memoria_aprendizaje = {}
 if "mostrar_caja_retro" not in st.session_state:
     st.session_state.mostrar_caja_retro = False
 if "pregunta_pendiente" not in st.session_state:
@@ -49,73 +49,59 @@ def extraer_conocimiento_fester():
     return texto_completo
 
 base_conocimiento = extraer_conocimiento_fester()
+st.success(f"📊 Base de datos activa: {len(base_conocimiento)} páginas indexadas de fichas técnicas.")
 
-# Diagnóstico limpio en pantalla
-num_bloques = len(base_conocimiento)
-st.success(f"📊 Base de datos activa: {num_bloques} páginas indexadas de fichas técnicas.")
-
-# 4. Función de normalización (ej: "cm202" encuentra "cm-202")
+# 4. Función de normalización de códigos
 def normalizar_termino(texto):
     return re.sub(r'[-.\s®™]', '', texto.lower())
 
 def buscar_fichas(consulta, historial):
     consulta_limpia = f"{consulta} {historial}".lower()
+    consulta_norm = normalizar_termino(consulta_limpia)
     
-    # Enrutamiento por zona real de obra
-    es_charola_zona = any(x in consulta_limpia for x in ["charola", "baño", "regadera", "cl"])
-    es_salitre_zona = any(x in consulta_limpia for x in ["salitre", "cr65"])
-    es_asfalto_zona = any(x in consulta_limpia for x in ["chapopote", "asfalto", "vaportite", "cimentacion"])
-    es_techo_zona = any(x in consulta_limpia for x in ["techo", "losa", "azotea", "acriton", "fester a"])
-
-    equivalencias = {
-        "chapopote": "vaportite asfalto",
-        "asfalto": "vaportite",
-        "acrilico": "acriton fester a",
-        "techo": "azotea",
-        "losa": "azotea",
-        "terraza": "cr66",
-        "vitropiso": "cr66",
-    }
-    
-    consulta_busqueda = consulta_limpia
-    for termino, reemplazo in equivalencias.items():
-        if termino in consulta_busqueda:
-            consulta_busqueda += f" {reemplazo}"
-
-    palabras = [p for p in re.findall(r"[\wáéíóúüñ-]+", consulta_busqueda) if len(p) > 2]
-    palabras_normalizadas = [normalizar_termino(p) for p in palabras]
+    # ENRUTAMIENTO ESTRICTO POR CÓDIGO DE PRODUCTO (Evita cruces de tecnología)
+    es_cr66 = "cr66" in consulta_norm
+    es_cl52 = "cl52" in consulta_norm or "charola" in consulta_norm or "baño" in consulta_norm
+    es_cr65 = "cr65" in consulta_norm or "salitre" in consulta_norm
+    es_vaportite = "vaportite" in consulta_norm or "chapopote" in consulta_norm or "asfalto" in consulta_norm
+    es_acriton = "acriton" in consulta_norm or "proshield" in consulta_norm or "techo" in consulta_norm or "losa" in consulta_norm
 
     resultados = []
     for item in base_conocimiento:
-        texto_base = item["texto"].lower()
-        texto_normalizado = normalizar_termino(item["texto"])
-        nombre_normalizado = normalizar_termino(item["origen"])
+        texto_norm = normalizar_termino(item["texto"])
+        nombre_norm = normalizar_termino(item["origen"])
         
-        # Candados de exclusión por zona
-        if es_charola_zona and "cl" not in nombre_normalizado and "cl52" not in texto_normalizado:
-            continue  
-        if es_salitre_zona and "cr65" not in nombre_normalizado and "cr65" not in texto_normalizado:
+        # APLICACIÓN DE CANDADOS RADICALES DE EXCLUSIÓN
+        if es_cr66 and "cr66" not in nombre_norm and "tienda" not in nombre_norm:
             continue
-        if es_asfalto_zona and "vaportite" not in nombre_normalizado:
+        if es_cl52 and "cl52" not in nombre_norm and "cl-52" not in nombre_norm and "tienda" not in nombre_norm:
             continue
-        if es_techo_zona and ("cl" in nombre_normalizado or "cr" in nombre_normalizado or "cf" in nombre_normalizado):
+        if es_cr65 and "cr65" not in nombre_norm and "tienda" not in nombre_norm:
+            continue
+        if es_vaportite and "vaportite" not in nombre_norm and "tienda" not in nombre_norm:
+            continue
+        if es_acriton and ("cl" in nombre_norm or "cr" in nombre_norm or "vaportite" in nombre_norm) and "tienda" not in nombre_norm:
             continue
 
+        # Cálculo de puntaje
         puntos = 0
-        for p, p_norm in zip(palabras, palabras_normalizadas):
-            if p in texto_base or p_norm in texto_normalizado:
-                puntos += 5
-            if p_norm in nombre_normalizado:
-                puntos += 40  # Bono por coincidir con el nombre de la ficha técnica
-                
-        if "tienda" in nombre_normalizado or "respuestas" in nombre_normalizado:
-            puntos *= 2
+        if "tienda" in nombre_norm or "respuestas" in nombre_norm:
+            puntos += 100  # Máxima prioridad absoluta a tu PDF de la tienda
+        
+        if "cr66" in consulta_norm and "cr66" in nombre_norm: puntos += 50
+        if "cl52" in consulta_norm and "cl52" in nombre_norm: puntos += 50
+        if "festerbond" in consulta_norm and "festerbond" in nombre_norm: puntos += 50
+
+        # Coincidencias de texto básico
+        palabras = [p for p in re.findall(r"[\wáéíóúüñ-]+", consulta_limpia) if len(p) > 2]
+        for p in palabras:
+            if p in item["texto"].lower(): puntos += 5
 
         if puntos > 0:
             resultados.append((puntos, item))
 
     if resultados:
-        resultados.sort(key=lambda x: x[0], reverse=True)
+        resultados.sort(key=lambda x: x[0], reverse=True) # Corregido con el índice numérico [0] de puntuación
     return "".join(f"\n[Ficha: {item['origen']}]\n{item['texto']}\n" for _, item in resultados[:2])
 
 # 5. Pintar historial en pantalla
@@ -132,7 +118,7 @@ if st.session_state.mostrar_caja_retro:
             if nueva_respuesta.strip():
                 clave_memoria = normalizar_termino(st.session_state.pregunta_pendiente)
                 st.session_state.memoria_aprendizaje[clave_memoria] = nueva_respuesta.strip()
-                st.success("¡Entendido! He aprendido la lección.")
+                st.success("¡Entendido! He aprendido la lección de mostrador.")
                 st.session_state.mostrar_caja_retro = False
                 st.rerun()
 
@@ -146,7 +132,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
     prompt_normalizado = normalizar_termino(prompt_lower)
     historial_texto = " ".join(m["content"] for m in st.session_state.messages[-4:]).lower()
 
-    # Saludos
+    # Intercepción flexible de saludos
     if re.search(r"\b(hola|holis|buen[oa]s?|saludos|qu[eé]\s+tal|buenas\s+tardes|buenos\s+dias)\b", prompt_lower):
         with st.chat_message("assistant"):
             res = "¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?"
@@ -154,7 +140,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
             st.session_state.messages.append({"role": "assistant", "content": res})
             st.stop()
 
-    # Buscar en memoria de aprendizaje
+    # Buscar en memoria de aprendizaje manual
     respuesta_aprendida = ""
     for clave, valor in st.session_state.memoria_aprendizaje.items():
         if clave in prompt_normalizado or prompt_normalizado in clave:
@@ -167,28 +153,20 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
             st.session_state.messages.append({"role": "assistant", "content": respuesta_aprendida})
             st.stop()
 
-    # Búsqueda en PDFs
+    # Ejecutar el buscador blindado por código de producto
     contexto_manuales = buscar_fichas(prompt, historial_texto)
     mensaje_no_info = "No comprendo del todo tu solicitud o la información exacta no viene en las fichas. Por favor comunícate con un especialista al **3317011786**."
 
-    if not contexto_manuales.strip():
-        with st.chat_message("assistant"):
-            st.markdown(mensaje_no_info)
-            st.session_state.messages.append({"role": "assistant", "content": mensaje_no_info})
-            st.session_state.pregunta_pendiente = prompt
-            st.session_state.mostrar_caja_retro = True
-            st.rerun()
-
     contexto_sistema = f"""
-Eres el Asesor Técnico Senior de Fester México. Responde siempre en un tono amable, claro, ultra conciso y profesional. Máximo 2 párrafos cortos.
+Eres el Asesor Técnico Senior de Fester México. Tu tono es profesional, claro y ultra conciso. Máximo 2 párrafos cortos.
 
-REGLAS CRÍTICAS:
-1. Si el cliente pregunta por una CHAROLA DE BAÑO o REGADERA, el producto oficial es FESTER CL-52. Prohibido recomendar Vaportite en baños.
-2. Si los datos recuperados abajo no contienen la respuesta exacta del producto consultado, di textualmente: {mensaje_no_info}
-3. Si te dan m², calcula el consumo basado en la ficha técnica inferior.
+REGLAS CRÍTICAS DE INGENIERÍA:
+1. UNIDADES DE MEDIDA DE CONSUMO: Entrega rendimientos basándote estrictamente en el texto de abajo. Si hablas de Fester CR-66, recuerda que el rendimiento oficial es por JUEGO COMPLETO o en KILOGRAMOS (kg/m²), nunca en litros.
+2. Si te preguntan cantidad de material para un área total en metros cuadrados (m²), efectúa el cálculo basado en el consumo numérico de la ficha técnica provista.
+3. Si los datos del texto oficial inferior vienen vacíos o mencionan productos ajenos a la consulta, di textualmente: {mensaje_no_info}
 
-TEXTO OFICIAL DE LA FICHA SELECCIONADA:
-{contexto_manuales}
+TEXTO REAL EXTRAÍDO DE LAS FICHAS TÉCNICAS SELECCIONADAS:
+{contexto_manuales if contexto_manuales else 'Vacio'}
 """
 
     with st.chat_message("assistant"):
@@ -202,7 +180,7 @@ TEXTO OFICIAL DE LA FICHA SELECCIONADA:
                 temperature=0.0,
                 max_tokens=500
             )
-            response = completion.choices[0].message.content
+            response = completion.choices.message.content
             
             if "3317011786" in response or "No comprendo" in response:
                 st.session_state.pregunta_pendiente = prompt
