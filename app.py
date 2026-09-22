@@ -46,7 +46,7 @@ num_bloques = len(base_conocimiento)
 if num_bloques == 0:
     st.error("⚠️ ALERTA: No se detectaron PDFs en la raíz de GitHub.")
 else:
-    st.success(f"📊 Base de datos activa: {num_bloques} páginas de fichas técnicas.")
+    st.success(f"📊 Base de datos activa: {num_bloques} páginas de fichas técnicas listas.")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -63,38 +63,34 @@ def guardar_respuesta(respuesta):
 
 
 def buscar_fichas(consulta, historial):
+    consulta_limpia = f"{consulta} {historial}".lower()
+    
+    # ENRUTAMIENTO ESTRICTO DE INGENIERÍA: Detectamos la zona real de la obra
+    es_charola_zona = any(x in consulta_limpia for x in ["charola", "baño", "regadera", "cl52", "cl-52"])
+    es_salitre_zona = any(x in consulta_limpia for x in ["salitre", "cr65", "cr-65"])
+    es_asfalto_zona = any(x in consulta_limpia for x in ["chapopote", "asfalto", "vaportite", "cimentacion", "desplante"])
+    es_techo_zona = any(x in consulta_limpia for x in ["techo", "losa", "azotea", "acriton", "fester a", "proshield"])
+
     equivalencias = {
         "chapopote": "vaportite asfalto impermeabilizante desplantes",
         "asfalto": "vaportite impermeabilizante asfaltico",
-        "impermeabilizante asfaltico": "vaportite",
         "acrilico": "acriton fester a",
-        "acrílico": "acriton fester a",
         "techo": "azotea",
         "losa": "azotea",
-        "terraza": "cr66 impermeabilizante cementoso",
-        "ceramica": "cr66",
+        "terraza": "cr66",
         "vitropiso": "cr66",
-        "charola": "cl52 cl-52",
-        "salitre": "cr65 cr66",
     }
-    consulta = consulta.lower()
-    consulta_busqueda = f"{consulta} {historial.lower()}"
+    
+    consulta_busqueda = consulta_limpia
     for termino, reemplazo in equivalencias.items():
         if termino in consulta_busqueda:
             consulta_busqueda += f" {reemplazo}"
 
-    # Detectamos la zona de forma estricta para bloquear archivos cruzados
-    es_charola_baño = any(x in consulta_busqueda for x in ["charola", "baño", "regadera", "cl52", "cl-52"])
-    es_techo_azotea = any(x in consulta_busqueda for x in ["techo", "losa", "azotea", "lluvia", "acriton", "proshield"])
-
     palabras = [
-        palabra
-        for palabra in re.findall(r"[\wáéíóúüñ-]+", consulta_busqueda)
-        if len(palabra) > 2
-        and palabra not in {
+        palabra for palabra in re.findall(r"[\wáéíóúüñ-]+", consulta_busqueda)
+        if len(palabra) > 2 and palabra not in {
             "qué", "que", "cuál", "cual", "cómo", "como", "para", "por",
             "con", "del", "una", "uno", "los", "las", "quiero", "necesito",
-            "tiene", "cuenta", "puede", "donde", "desde", "sobre",
         }
     ]
 
@@ -103,20 +99,25 @@ def buscar_fichas(consulta, historial):
         texto = item["texto"].lower()
         nombre = item["origen"].lower()
         
-        # 🛡️ FILTROS DE EXCLUSIÓN RADICALES CONTRA ESPECIFICACIONES ERRÓNEAS:
-        if es_charola_baño and ("vaportite" in nombre or "mip" in nombre or "cr6" in nombre):
-            continue  # Queda estrictamente PROHIBIDO sugerir asfálticos o cementosos rígidos en baños
-        if es_techo_azotea and ("cl52" in nombre or "cr65" in nombre or "cf" in nombre):
-            continue  # No metas el CL52 ni anclajes en la losa expuesta
+        # APLICACIÓN DE CANDADOS DE EXCLUSIÓN
+        if es_charola_zona and "cl" not in name := nombre and "cl52" not in texto:
+            continue  
+        if es_salitre_zona and "cr65" not in nombre and "cr-65" not in texto:
+            continue
+        if es_asfalto_zona and "vaportite" not in nombre:
+            continue
+        if es_techo_zona and ("cl" in nombre or "cr" in nombre or "cf" in nombre):
+            continue
 
         puntos = sum(5 for palabra in palabras if palabra in texto)
-        puntos += sum(35 for palabra in palabras if palabra in nombre) # Subimos a 35 el bono del nombre del archivo
+        puntos += sum(25 for palabra in palabras if palabra in nombre)
         if puntos:
             resultados.append((puntos, item))
 
-    resultados.sort(key=lambda resultado: resultado[0], reverse=True)
+    # CORRECCIÓN DE ORDENAMIENTO EN PYTHON 3: Ordenamos por el valor numérico de los puntos x[0]
+    resultados.sort(key=lambda x: x, reverse=True)
     
-    # Traemos las 2 páginas más exactas para mantener los tokens abajo de 8,000 pero con contexto completo
+    # Traemos las 2 páginas más fuertes bajo el filtro estricto
     return "".join(
         f"\n[Ficha oficial: {item['origen']} - {item['referencia']}]\n{item['texto']}\n"
         for _, item in resultados[:2]
@@ -125,15 +126,9 @@ def buscar_fichas(consulta, historial):
 
 def es_sondeo_inicial_azotea(texto, historial):
     texto = f"{historial} {texto}".lower()
-    pide_recomendacion = any(
-        frase in texto
-        for frase in ("qué me recomiendas", "cual me recomiendas", "cuál me recomiendas", "recomienda", "que imper", "que producto")
-    )
-    es_azotea = any(palabra in texto for palabra in ("azotea", "techo", "losa", "impermeabilizar mi azote"))
-    ya_respondio = any(
-        palabra in historial.lower()
-        for palabra in ("¿ya cuenta con filtraciones", "preventivo", "superficie", "encharcamientos")
-    )
+    pide_recomendacion = any(frase in texto for frase in ("qué me recomiendas", "cual me recomiendas", "cuál me recomiendas", "recomienda"))
+    es_azotea = any(palabra in texto for palabra in ("azotea", "techo", "losa"))
+    ya_respondio = any(palabra in historial.lower() for palabra in ("filtraciones", "preventivo", "superficie"))
     return pide_recomendacion and es_azotea and not ya_respondio
 
 
@@ -143,42 +138,32 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     prompt_lower = prompt.lower().strip()
-    historial_texto = " ".join(
-        message["content"] for message in st.session_state.messages[-4:]
-    ).lower()
+    historial_texto = " ".join(message["content"] for message in st.session_state.messages[-4:]).lower()
 
     if re.search(r"\b(hola|buen[oa]s?|saludos|qué tal)\b", prompt_lower):
-        guardar_respuesta(
-            "¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?"
-        )
+        guardar_respuesta("¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?")
         st.stop()
 
     if es_sondeo_inicial_azotea(prompt_lower, historial_texto):
         guardar_respuesta(
             "Con gusto te ayudo a elegir el sistema para tu azotea. Antes de recomendarte un producto, "
             "¿ya cuenta con filtraciones o es un trabajo preventivo? También indícame: ¿qué superficie "
-            "tiene (concreto, impermeabilizante anterior, cerámica u otra)?, ¿tiene humedad o encharcamientos?, "
-            "¿qué durabilidad buscas y prefieres una solución acrílica o asfáltica?"
+            "tiene (concreto, impermeabilizante anterior)?, ¿tiene humedad o encharcamientos? y ¿qué durabilidad buscas?"
         )
         st.stop()
 
     contexto_manuales = buscar_fichas(prompt, historial_texto)
-    mensaje_no_info = (
-        "Lo siento, esa información técnica no viene completa en esta ficha. "
-        "Por favor comunícate al **3317011786** para atenderte con mucho gusto."
-    )
+    mensaje_no_info = "Lo siento, esa información exacta no viene en la ficha. Comunícate con un especialista al **3317011786**."
 
     contexto_sistema = f"""
-Eres el Asesor Técnico Senior de Fester México y atiendes en español. Tu tono es amable, claro, práctico y profesional. Responde de forma ejecutiva en un máximo de 2 o 3 párrafos cortos.
+Eres el Asesor Técnico Senior de Fester México y respondes bajo la perspectiva de un ingeniero experto. Responde siempre en un tono amable, claro, ultra conciso y profesional. Máximo 2 párrafos cortos.
 
-REGLAS TÉCNICAS CRÍTICAS:
-1. CHAROLAS DE BAÑO Y REGADERAS: El único producto oficial para interiores y zonas húmedas bajo recubrimiento cerámico es FESTER CL-52 (Acrílico base agua). Está estrictamente PROHIBIDO recomendar Vaportite o sistemas base solvente en baños.
-2. Cada rendimiento o consumo que des debe mencionar el nombre del producto, la unidad de medida (L/m² o kg/m²) y estar basado estrictamente en el texto oficial de abajo.
-3. Si el usuario te da las medidas de la obra (ej. 5 charolas de 6 m² cada una = 30 m²), realiza el cálculo matemático multiplicando esa área por el rendimiento que marca la ficha técnica del CL-52 para decirle cuántos litros o botes requiere comprar.
-4. Para CR66, indica que es cementoso elástico de dos componentes para terrazas o albercas; si el área supera 25 m², advierte sobre la necesidad de ejecutar juntas de dilatación para evitar que el sistema falle.
-5. Si un dato técnico exacto no viene en el texto de abajo, di exactamente el mensaje: {mensaje_no_info}
+REGLAS CRÍTICAS:
+1. Si el cliente pregunta por una CHAROLA DE BAÑO o REGADERA, el producto oficial e inalterable es FESTER CL-52 (Acrílico base agua). Está ESTRICTAMENTE PROHIBIDO recomendar Vaportite 550 o sistemas asfálticos para interiores de baños.
+2. Si los datos recuperados abajo no contienen la respuesta exacta, di textualmente: {mensaje_no_info}
+3. Entrega siempre los rendimientos de forma clara mencionando unidades basándote en el texto inferior.
 
-TEXTO REAL EXTRAÍDO DE TU FICHA TÉCNICA:
+TEXTO OFICIAL DE LA FICHA SELECCIONADA:
 {contexto_manuales if contexto_manuales else 'Vacio'}
 """
 
@@ -191,11 +176,12 @@ TEXTO REAL EXTRAÍDO DE TU FICHA TÉCNICA:
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.0,
-                max_tokens=600, # Subimos a 600 para que termine de escribir el proceso de aplicación completo sin cortarse
+                max_tokens=600,
             )
+            # Extracción limpia y segura para el modelo fijo de Groq
             response = completion.choices.message.content
-            st.session_state.messages.append({"role": "assistant", "content": response})
             st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as error:
             st.error(f"Error en motor IA: {error}")
 
