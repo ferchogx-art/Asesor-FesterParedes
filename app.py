@@ -8,25 +8,21 @@ st.set_page_config(page_title="Asesor Técnico Fester", page_icon="🏗️", lay
 st.title("🏗️ Asesor Técnico FesterParedes IA")
 st.write("Sistema experto con consulta prioritaria a tu manual de mostrador.")
 
-# 1. Conectar con la API de Groq usando el modelo oficial estable
+# 1. Conectar con la API de Groq
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
 if not api_key:
     st.error("Falta configurar la clave GROQ_API_KEY en los Secrets.")
     st.stop()
 
 client = Groq(api_key=api_key)
-# El motor más potente y permanente de la infraestructura de Groq
-MODELO_FAVORITO = "llama-3.3-70b-versatile"
+# CAMBIO DE MOTOR DEFINITIVO: Modelo insignia permanente en la red de producción de Groq
+MODELO_FAVORITO = "llama-3.1-8b-instant"
 
 # 2. Inicializar memorias en el servidor
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "memoria_aprendizaje" not in st.session_state:
     st.session_state.memoria_aprendizaje = {}
-if "activar_retro" not in st.session_state:
-    st.session_state.activar_retro = False
-if "codigo_pendiente" not in st.session_state:
-    st.session_state.codigo_pendiente = ""
 
 # Carga inteligente de PDFs
 @st.cache_resource
@@ -60,15 +56,19 @@ def guardar_respuesta(respuesta):
         st.markdown(respuesta)
     st.session_state.messages.append({"role": "assistant", "content": respuesta})
 
-# 3. Buscador Inteligente con Filtros de Exclusión Tecnológica Estrictos
+# 3. Función de normalización de códigos
+def normalizar_termino(texto):
+    return re.sub(r'[-.\s®™]', '', texto.lower())
+
+# 4. Buscador Inteligente con Prioridad de Tienda y Ordenamiento Numérico Corregido
 def buscar_fichas(consulta, historial):
     consulta_limpia = f"{consulta} {historial}".lower()
     
     es_charola = any(x in consulta_limpia for x in ["charola", "baño", "regadera", "cl52", "cl-52"])
     es_salitre = any(x in consulta_limpia for x in ["salitre", "cr65", "cr-65", "muro", "pared", "humedad"])
     es_asfalto = any(x in consulta_limpia for x in ["chapopote", "asfalto", "vaportite", "desplante", "cimentacion"])
-    es_techo = any(x in consulta_limpia for x in ["techo", "losa", "azotea", "acriton", "fester a", "proshield", "gotera", "filtracion", "filtraciones"])
-    es_cr66 = any(x in consulta_limpia for x in ["cr66", "cr-66", "cisterna", "alberca", "terraza"])
+    es_techo = any(x in consulta_limpia for x in ["techo", "losa", "azotea", "acriton", "fester a", "proshield", "gotera", "filtracion"])
+    es_cr66 = any(x in consulta_limpia for x in ["cr66", "cr-66", "cisterna", "alberca"])
 
     palabras = [p for p in re.findall(r"[\wáéíóúüñ-]+", consulta_limpia) if len(p) > 2]
 
@@ -76,31 +76,29 @@ def buscar_fichas(consulta, historial):
     resultados_fabrica = []
     
     for item in base_conocimiento:
-        texto = item["texto"].lower()
-        nombre = item["origen"].lower()
+        texto_item = item["texto"].lower()
+        nombre_item = item["origen"].lower()
         
-        # Candados radicales de exclusión técnica en azoteas
-        if es_techo and ("cl" in nombre or "cr" in nombre or "cf" in nombre or "nanotech" in nombre or "cx" in nombre):
-            continue
-        if es_charola and "cl" not in nombre and "tienda" not in nombre:
-            continue
-        if es_salitre and "cr65" not in nombre and "tienda" not in nombre:
-            continue
-        if es_asfalto and "vaportite" not in nombre and "tienda" not in nombre:
-            continue
-        if es_cr66 and "cr66" not in nombre and "tienda" not in nombre:
-            continue
+        # Filtros estrictos de exclusión de zona
+        if "tienda" not in nombre_item and "respuestas" not in nombre_item:
+            if es_charola and "cl" not in nombre_item: continue
+            if es_salitre and "cr65" not in nombre_item: continue
+            if es_asfalto and "vaportite" not in nombre_item: continue
+            if es_cr66 and "cr66" not in nombre_item: continue
+            if es_techo and ("cl" in nombre_item or "cr" in nombre_item or "cf" in nombre_item or "nanotech" in nombre_item):
+                continue
 
-        puntos = sum(5 for palabra in palabras if palabra in texto)
-        puntos += sum(35 for palabra in palabras if palabra in nombre)
+        puntos = sum(5 for palabra in palabras if palabra in texto_item)
+        puntos += sum(35 for palabra in palabras if palabra in nombre_item)
         
         if puntos > 0:
-            if "tienda" in nombre or "respuestas" in nombre:
+            if "tienda" in nombre_item or "respuestas" in nombre_item:
                 resultados_tienda.append((puntos + 150, item))
             else:
                 resultados_fabrica.append((puntos, item))
 
     contexto_final = ""
+    # ORDENAMIENTO SEGURO USANDO EL ÍNDICE NUMÉRICO DE COINCIDENCIAS (Evita el viejo TypeError)
     if resultados_tienda:
         resultados_tienda.sort(key=lambda x: x[0], reverse=True)
         for _, res in resultados_tienda[:2]:
@@ -120,82 +118,81 @@ def es_sondeo_inicial_azotea(texto, historial):
     ya_respondio_sondeo = any(p in historial for p in ["filtraciones", "preventivo", "tengo filtraciones", "ya tengo", "tiene goteras", "goteras activas"])
     return pide_rec and es_zona and not ya_respondio_sondeo
 
-# 4. Procesamiento del chat
+# 5. Procesamiento del chat
 if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto deseas validar?"):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     prompt_lower = prompt.lower().strip()
+    prompt_normalizado = normalizar_termino(prompt_lower)
     historial_texto = " ".join(m["content"] for m in st.session_state.messages[-6:]).lower()
 
-    if re.search(r"\b(hola|holis|buen[oa]s?|saludos|qu[eé]\s+tal)\b", prompt_lower) and len(prompt_lower) < 10:
+    # Filtro de Saludos Estricto
+    if prompt_lower in ["hola", "buenos dias", "buenas tardes", "saludos", "holis", "que tal"] or (re.search(r"\b(hola|holis)\b", prompt_lower) and len(prompt_lower) < 8):
         guardar_respuesta("¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?")
         st.stop()
 
-    # Verificar aprendizaje manual
-    prompt_limpio_cod = re.sub(r'[^a-z0-9ñ]', '', prompt_lower)
-    if prompt_limpio_cod in st.session_state.memoria_aprendizaje:
-        guardar_respuesta(st.session_state.memoria_aprendizaje[prompt_limpio_cod])
+    # VERIFICACIÓN DE RETROALIMENTACIÓN MANUAL
+    if prompt_normalizado in st.session_state.memoria_aprendizaje:
+        guardar_respuesta(st.session_state.memoria_aprendizaje[prompt_normalizado])
         st.stop()
 
-    if es_sondeo_inicial_azotea(prompt_lower, historial_texto):
-        guardar_respuesta(
-            "Con gusto te ayudo a elegir el sistema ideal para tu azotea. Antes de sugerirte el producto específico, "
-            "compárteme de favor: ¿tu azotea cuenta actualmente con filtraciones o goteras activas, o es un trabajo netamente preventivo?"
-        )
+    # INTERCEPCIÓN DE ARCHIVO MAESTRO
+    respuesta_directa = ""
+    if any(g in prompt_lower for g in ["gotera", "filtracion", "tiene goteras", "tengo filtraciones", "ya tiene"]):
+        if "azotea" in historial_texto or "techo" in historial_texto or "losa" in historial_texto:
+            respuesta_directa = (
+                "Para una azotea con goteras activas la solución oficial es **FESTER ACRITON PRO SHIELD MAX** "
+                "(Premium), disponible en duraciones de 4, 6 y 8 años. El proceso es:<br/><br/>"
+                "1. Limpieza completa de la superficie.<br/>"
+                "2. Aplicar una mano de Sellador Acriton.<br/>"
+                "3. Resanar fisuras menores (≤ 4 mm) con Resanador Acriton (si superan 4 mm usar Superseal P).<br/>"
+                "4. Refuerzo en puntos críticos (bajantes, chaflanes) con malla Acriflex o Revoflex.<br/>"
+                "5. Aplicar dos capas de ACRITON PRO SHIELD MAX, cubriendo uniformemente ≈ 1 L/m² total a dos capas.<br/><br/>"
+                "Este sistema **elastomérico 100% acrílico base agua de última generación** brinda una altísima resistencia a la abrasión, "
+                "excelente elasticidad ante los movimientos de la losa y secado extra rápido."
+            )
+    elif "preventivo" in prompt_lower or "mera prevencion" in prompt_lower or "prevenir" in prompt_lower:
+        if "azotea" in historial_texto or "techo" in historial_texto or "losa" in historial_texto:
+            respuesta_directa = (
+                "Excelente, al ser un trabajo preventivo (mantenimiento regular sin goteras activas), la recomendación ideal "
+                "por presupuesto y desempeño es la **Línea Profesional Fester A** (disponible en presentaciones de 3, 5 y 7 años). "
+                "Lleva el mismo proceso de preparación con Sellador Acriton y malla Revoflex in puntos críticos, rindiendo **1 Litro por m² a dos capas**."
+            )
+
+    if respuesta_directa:
+        guardar_respuesta(respuesta_directa)
         st.stop()
 
+    # Ejecutar el buscador
     contexto_manuales = buscar_fichas(prompt, historial_texto)
     mensaje_no_info = "No tengo esa información exacta en las fichas cargadas. Por favor comunícate con un especialista al **3317011786**."
 
     contexto_sistema = f"""
-Eres el Asesor Técnico Senior de Fester México y respondes con base en tu manual. Tu tono es profesional, claro y ultra conciso. Máximo 2 párrafos cortos.
+Eres el Asesor Técnico Senior de Fester México. Tu tono es profesional, claro, atento y muy conciso. Responde en máximo 2 párrafos cortos.
 
-REGLAS DE ORO DE INGENIERÍA:
-1. SIEMPRE QUE TE HABLEN DE TECHOS, LOSAS O AZOTEAS: Fester Acriton es un impermeabilizante 100% elastomérico ACRÍLICO base agua con polímeros avanzados. Está prohibido decir que contiene poliuretano o solventes.
+REGLAS CRÍTICAS DE INGENIERÍA:
+1. Recuerda que Fester Acritón Pro Shield Max es un sistema ELASTOMÉRICO 100% ACRÍLICO BASE AGUA. Está prohibido decir que contiene poliuretano o solventes.
 2. Si te preguntan por problemas de HUMEDAD O SALITRE EN EL MURO o PARED, la recomendación oficial según tu manual de tienda es el FESTER CR-65 y se explica brevemente su proceso (retirar enjarre, limpiar superficie, resanar con CM-200, dos manos cruzadas y curado obligatorio con agua).
-3. Si los datos del texto oficial inferior vienen vacíos o no corresponden, responde exactamente con la frase de asistencia técnica telefónica: {mensaje_no_info}
+3. Si los datos del texto oficial inferior vienen vacíos o no corresponden al área platicada, responde textualmente: {mensaje_no_info}
 
-TEXTO OFICIAL EXTRAÍDO PARA RESPONDER HOY:
+TEXTO REAL EXTRAÍDO PARA RESPONDER:
 {contexto_manuales if contexto_manuales else ''}
 """
 
-    response = ""
     with st.chat_message("assistant"):
         try:
-            mensajes_ia = [
-                {"role": "system", "content": contexto_sistema},
-                {"role": "user", "content": prompt}
-            ]
-
             completion = client.chat.completions.create(
                 model=MODELO_FAVORITO,
-                messages=mensajes_ia,
+                messages=[
+                    {"role": "system", "content": contexto_sistema},
+                    {"role": "user", "content": prompt}
+                ],
                 temperature=0.0,
-                max_tokens=450,
+                max_tokens=450
             )
-            
             response = completion.choices[0].message.content
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
             
-        except Exception as error:
-            st.error(f"Error en motor IA: {error}")
-
-    # CONFIGURACIÓN DE RETROALIMENTACIÓN EXTERNA (Segura y fuera del bloque try)
-    if mensaje_no_info in response or "3317011786" in response:
-        st.session_state.activar_retro = True
-        st.session_state.codigo_pendiente = prompt_limpio_cod
-
-# Mostrar la caja de aprendizaje de forma externa e independiente si se activa la bandera
-if st.session_state.activar_retro:
-    st.warning("💡 MODO APRENDIZAJE: La IA no conoce esta respuesta. Agrega la solución correcta aquí abajo para que se la aprenda de memoria:")
-    with st.form(key=f"form_aprendizaje_{st.session_state.codigo_pendiente}"):
-        nueva_respuesta_experta = st.text_area("Escribe la recomendación de mostrador correcta aquí:")
-        if st.form_submit_button("Guardar en la memoria de la IA"):
-            if nueva_respuesta_experta.strip():
-                st.session_state.memoria_aprendizaje[st.session_state.codigo_pendiente] = nueva_respuesta_experta.strip()
-                st.success("¡Excelente! He guardado tu lección. Borra el texto de la barra de chat para continuar.")
-                st.session_state.activar_retro = False
-                st.rerun()
+            if mensaje_no_info in response or "3317011786" in response:
+                st.markdown(response)
