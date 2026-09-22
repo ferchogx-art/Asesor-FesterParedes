@@ -74,7 +74,7 @@ def buscar_fichas(consulta, historial):
         "terraza": "cr66 impermeabilizante cementoso",
         "ceramica": "cr66",
         "vitropiso": "cr66",
-        "charola": "cl52",
+        "charola": "cl52 cl-52",
         "salitre": "cr65 cr66",
     }
     consulta = consulta.lower()
@@ -82,6 +82,10 @@ def buscar_fichas(consulta, historial):
     for termino, reemplazo in equivalencias.items():
         if termino in consulta_busqueda:
             consulta_busqueda += f" {reemplazo}"
+
+    # Detectamos la zona de forma estricta para bloquear archivos cruzados
+    es_charola_baño = any(x in consulta_busqueda for x in ["charola", "baño", "regadera", "cl52", "cl-52"])
+    es_techo_azotea = any(x in consulta_busqueda for x in ["techo", "losa", "azotea", "lluvia", "acriton", "proshield"])
 
     palabras = [
         palabra
@@ -98,14 +102,21 @@ def buscar_fichas(consulta, historial):
     for item in base_conocimiento:
         texto = item["texto"].lower()
         nombre = item["origen"].lower()
+        
+        # 🛡️ FILTROS DE EXCLUSIÓN RADICALES CONTRA ESPECIFICACIONES ERRÓNEAS:
+        if es_charola_baño and ("vaportite" in nombre or "mip" in nombre or "cr6" in nombre):
+            continue  # Queda estrictamente PROHIBIDO sugerir asfálticos o cementosos rígidos en baños
+        if es_techo_azotea and ("cl52" in nombre or "cr65" in nombre or "cf" in nombre):
+            continue  # No metas el CL52 ni anclajes en la losa expuesta
+
         puntos = sum(5 for palabra in palabras if palabra in texto)
-        puntos += sum(25 for palabra in palabras if palabra in nombre)
+        puntos += sum(35 for palabra in palabras if palabra in nombre) # Subimos a 35 el bono del nombre del archivo
         if puntos:
             resultados.append((puntos, item))
 
-    # Ajuste de ordenamiento por el índice de puntos [0]
     resultados.sort(key=lambda resultado: resultado[0], reverse=True)
     
+    # Traemos las 2 páginas más exactas para mantener los tokens abajo de 8,000 pero con contexto completo
     return "".join(
         f"\n[Ficha oficial: {item['origen']} - {item['referencia']}]\n{item['texto']}\n"
         for _, item in resultados[:2]
@@ -114,16 +125,16 @@ def buscar_fichas(consulta, historial):
 
 def es_sondeo_inicial_azotea(texto, historial):
     texto = f"{historial} {texto}".lower()
-    pide_recommendacion = any(
+    pide_recomendacion = any(
         frase in texto
-        for frase in ("qué me recomiendas", "cual me recomiendas", "cuál me recomiendas", "recomienda", "que imper")
+        for frase in ("qué me recomiendas", "cual me recomiendas", "cuál me recomiendas", "recomienda", "que imper", "que producto")
     )
     es_azotea = any(palabra in texto for palabra in ("azotea", "techo", "losa", "impermeabilizar mi azote"))
     ya_respondio = any(
         palabra in historial.lower()
-        for palabra in ("¿ya cuenta con filtraciones", "¿es preventivo", "preventivo o si ya hay filtraciones")
+        for palabra in ("¿ya cuenta con filtraciones", "preventivo", "superficie", "encharcamientos")
     )
-    return pide_recommendacion and es_azotea and not ya_respondio
+    return pide_recomendacion and es_azotea and not ya_respondio
 
 
 if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto deseas validar?"):
@@ -133,12 +144,12 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
 
     prompt_lower = prompt.lower().strip()
     historial_texto = " ".join(
-        message["content"] for message in st.session_state.messages[-6:]
+        message["content"] for message in st.session_state.messages[-4:]
     ).lower()
 
     if re.search(r"\b(hola|buen[oa]s?|saludos|qué tal)\b", prompt_lower):
         guardar_respuesta(
-            "¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar?"
+            "¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?"
         )
         st.stop()
 
@@ -151,54 +162,24 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
         )
         st.stop()
 
-    if prompt_lower in ["acriton", "quiero acriton", "necesito acriton"]:
-        guardar_respuesta(
-            "Manejo tanto el **Fester Acriton Sellador** (utilizado como primario para preparar la superficie) como la línea de "
-            "**Impermeabilizantes Premium Fester Acriton Pro Shield Max** (con durabilidades de 4, 6, 8 y 12 años). "
-            "¿Cuál de estos dos te interesa validar para tu proyecto?"
-        )
-        st.stop()
-
     contexto_manuales = buscar_fichas(prompt, historial_texto)
     mensaje_no_info = (
-        "Lo siento, esa información te la puede dar un compañero. "
-        "Comunícate al **3317011786**."
+        "Lo siento, esa información técnica no viene completa en esta ficha. "
+        "Por favor comunícate al **3317011786** para atenderte con mucho gusto."
     )
 
     contexto_sistema = f"""
-Eres el Asesor Técnico Senior de Fester México y atiendes en español. Tu tono es amable,
-claro, práctico y profesional. Responde en máximo 2 párrafos cortos, salvo que una secuencia
-de aplicación requiera una lista breve.
+Eres el Asesor Técnico Senior de Fester México y atiendes en español. Tu tono es amable, claro, práctico y profesional. Responde de forma ejecutiva en un máximo de 2 o 3 párrafos cortos.
 
-REGLAS CRÍTICAS:
-1. Usa exclusivamente las fichas oficiales incluidas al final para beneficios, características,
-   rendimientos, consumos, diluciones, tiempos, preparación y aplicación. Si un dato no aparece
-en las fichas recuperadas, no lo inventes y responde exactamente: {mensaje_no_info}
-2. Cada rendimiento debe mencionar producto, unidad y que está basado en la ficha técnica. Nunca
-   mezcles el rendimiento de un producto con el de otro.
-3. Cuando el cliente pregunte por una azotea, primero sondea si es preventivo o si ya hay filtraciones,
-   tipo de superficie, humedad o impermeabilizante anterior, solución acrílica o asfáltica y durabilidad.
-   Después recomienda solamente con la ficha técnica.
-4. Si ya existen filtraciones, considera Acriton Pro Shield Max (durabilidades de 4, 6 u 8 años
-   únicamente si así aparece en la ficha), la línea Profesional (3, 5 o 7 años) y 5 Fibratado.
-   Menciona sus beneficios solo cuando estén escritos en la ficha técnica recuperada.
-5. Para azoteas, explica la preparación y el sistema únicamente con respaldo documental: superficie
-   limpia, barrida and sin polvo; sellador Acriton y su rendimiento; resanador Acriton para juntas
-   menores a 4 mm; Superseal P para juntas mayores; FT201 para juntas de alto movimiento; Revoflex
-   o Acriflex en domos, bajantes, zavaletas y chaflanes; primera capa contra el sentido del agua,
-   segunda en el sentido del flujo y el tiempo entre capas solo si la ficha lo confirma.
-6. Si hay cavidades o estancamientos, evalúa CM200 o un entortado reforzado con Festerbond. Describe
-   características, beneficios y rendimiento solo desde sus fichas.
-7. "Chapopote" o "impermeabilizante asfáltico" normalmente se refiere a Vaportite, pero acláralo
-   antes de asumir. Para desplantes, menciona Vaportite, primario e Hidroprimer solo con sus
-   características, beneficios y rendimiento documentados.
-8. Para CL52 y CR65, identifica el uso correcto con las fichas. Para CR66, indica que es cementoso
-   de dos componentes solo si la ficha recuperada lo confirma; si la terraza supera 25 m², pregunta
-   o indica las juntas de dilatación únicamente si ese criterio está estipulado. Si te preguntan por 
-   cantidad de material para un área total en metros cuadrados (m²), efectúa el cálculo basado en el consumo de la ficha técnica.
-   
-TEXTO OFICIAL DE LAS FICHAS TÉCNICAS:
-{contexto_manuales if contexto_manuales else 'No hay informacion registrada.'}
+REGLAS TÉCNICAS CRÍTICAS:
+1. CHAROLAS DE BAÑO Y REGADERAS: El único producto oficial para interiores y zonas húmedas bajo recubrimiento cerámico es FESTER CL-52 (Acrílico base agua). Está estrictamente PROHIBIDO recomendar Vaportite o sistemas base solvente en baños.
+2. Cada rendimiento o consumo que des debe mencionar el nombre del producto, la unidad de medida (L/m² o kg/m²) y estar basado estrictamente en el texto oficial de abajo.
+3. Si el usuario te da las medidas de la obra (ej. 5 charolas de 6 m² cada una = 30 m²), realiza el cálculo matemático multiplicando esa área por el rendimiento que marca la ficha técnica del CL-52 para decirle cuántos litros o botes requiere comprar.
+4. Para CR66, indica que es cementoso elástico de dos componentes para terrazas o albercas; si el área supera 25 m², advierte sobre la necesidad de ejecutar juntas de dilatación para evitar que el sistema falle.
+5. Si un dato técnico exacto no viene en el texto de abajo, di exactamente el mensaje: {mensaje_no_info}
+
+TEXTO REAL EXTRAÍDO DE TU FICHA TÉCNICA:
+{contexto_manuales if contexto_manuales else 'Vacio'}
 """
 
     with st.chat_message("assistant"):
@@ -210,12 +191,12 @@ TEXTO OFICIAL DE LAS FICHAS TÉCNICAS:
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.0,
-                max_tokens=400,
+                max_tokens=600, # Subimos a 600 para que termine de escribir el proceso de aplicación completo sin cortarse
             )
-            # CORRECCIÓN DE EXTRACCIÓN CON EL ÍNDICE [0] PARA EL MODELO FIJO
-            response = completion.choices[0].message.content
-            st.markdown(response)
+            response = completion.choices.message.content
             st.session_state.messages.append({"role": "assistant", "content": response})
+            st.markdown(response)
         except Exception as error:
             st.error(f"Error en motor IA: {error}")
+
 
