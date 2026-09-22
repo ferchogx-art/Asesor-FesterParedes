@@ -6,19 +6,19 @@ from groq import Groq
 
 st.set_page_config(page_title="Asesor Técnico Fester", page_icon="🏗️", layout="centered")
 st.title("🏗️ Asesor Técnico FesterParedes IA")
-st.write("Sistema experto con consulta prioritaria a tu manual de mostrador.")
+st.write("Sistema experto con consulta prioritaria a tu manual de mostrador y aprendizaje activo.")
 
-# 1. Conectar con la API de Groq
+# 1. Conectar con la API de Groq usando un modelo ultra estable
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
 if not api_key:
     st.error("Falta configurar la clave GROQ_API_KEY en los Secrets.")
     st.stop()
 
 client = Groq(api_key=api_key)
-# CAMBIO DE MOTOR DEFINITIVO: Modelo insignia permanente en la red de producción de Groq
-MODELO_FAVORITO = "llama-3.1-8b-instant"
+# Modelo fijo e industrial, súper veloz y compatible con el formato estándar
+MODELO_FAVORITO = "llama3-8b-8192"
 
-# 2. Inicializar memorias en el servidor
+# 2. Inicializar memorias en el servidor (Aquí vive tu retroalimentación)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "memoria_aprendizaje" not in st.session_state:
@@ -45,6 +45,7 @@ def extraer_conocimiento_fester():
     return texto_completo
 
 base_conocimiento = extraer_conocimiento_fester()
+st.success(f"📊 Sistema Activo: {len(base_conocimiento)} páginas de fichas técnicas listas para consultar.")
 
 # Pintar historial en pantalla
 for message in st.session_state.messages:
@@ -60,14 +61,14 @@ def guardar_respuesta(respuesta):
 def normalizar_termino(texto):
     return re.sub(r'[-.\s®™]', '', texto.lower())
 
-# 4. Buscador Inteligente con Prioridad de Tienda y Ordenamiento Numérico Corregido
+# 4. Buscador Inteligente con Exclusión Tecnológica Estricta
 def buscar_fichas(consulta, historial):
     consulta_limpia = f"{consulta} {historial}".lower()
     
     es_charola = any(x in consulta_limpia for x in ["charola", "baño", "regadera", "cl52", "cl-52"])
     es_salitre = any(x in consulta_limpia for x in ["salitre", "cr65", "cr-65", "muro", "pared", "humedad"])
     es_asfalto = any(x in consulta_limpia for x in ["chapopote", "asfalto", "vaportite", "desplante", "cimentacion"])
-    es_techo = any(x in consulta_limpia for x in ["techo", "losa", "azotea", "acriton", "fester a", "proshield", "gotera", "filtracion"])
+    es_techo = any(x in consulta_limpia for x in ["techo", "losa", "azotea", "acriton", "fester a", "proshield", "gotera", "filtracion", "filtraciones"])
     es_cr66 = any(x in consulta_limpia for x in ["cr66", "cr-66", "cisterna", "alberca"])
 
     palabras = [p for p in re.findall(r"[\wáéíóúüñ-]+", consulta_limpia) if len(p) > 2]
@@ -79,7 +80,7 @@ def buscar_fichas(consulta, historial):
         texto_item = item["texto"].lower()
         nombre_item = item["origen"].lower()
         
-        # Filtros estrictos de exclusión de zona
+        # Candados de exclusión en azoteas
         if "tienda" not in nombre_item and "respuestas" not in nombre_item:
             if es_charola and "cl" not in nombre_item: continue
             if es_salitre and "cr65" not in nombre_item: continue
@@ -98,7 +99,6 @@ def buscar_fichas(consulta, historial):
                 resultados_fabrica.append((puntos, item))
 
     contexto_final = ""
-    # ORDENAMIENTO SEGURO USANDO EL ÍNDICE NUMÉRICO DE COINCIDENCIAS (Evita el viejo TypeError)
     if resultados_tienda:
         resultados_tienda.sort(key=lambda x: x[0], reverse=True)
         for _, res in resultados_tienda[:2]:
@@ -113,12 +113,12 @@ def buscar_fichas(consulta, historial):
 
 def es_sondeo_inicial_azotea(texto, historial):
     texto_completo = f"{historial} {texto}".lower()
-    pide_rec = any(f in texto_completo for f in ("que me recomiendas", "cual me recomiendas", "recomienda", "que aplico", "que impermeabilizante"))
+    pide_rec = any(f in texto_completo for f in ("que me recomiendas", "cual me recomiendas", "recomienda", "que aplico"))
     es_zona = any(p in texto_completo for p in ("azotea", "techo", "losa"))
-    ya_respondio_sondeo = any(p in historial for p in ["filtraciones", "preventivo", "tengo filtraciones", "ya tengo", "tiene goteras", "goteras activas"])
+    ya_respondio_sondeo = any(p in historial for p in ["filtraciones", "preventivo", "tengo filtraciones", "ya tengo"])
     return pide_rec and es_zona and not ya_respondio_sondeo
 
-# 5. Procesamiento del chat
+# 5. Entrada del usuario
 if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto deseas validar?"):
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -128,17 +128,17 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
     prompt_normalizado = normalizar_termino(prompt_lower)
     historial_texto = " ".join(m["content"] for m in st.session_state.messages[-6:]).lower()
 
-    # Filtro de Saludos Estricto
+    # Saludos directos locales
     if prompt_lower in ["hola", "buenos dias", "buenas tardes", "saludos", "holis", "que tal"] or (re.search(r"\b(hola|holis)\b", prompt_lower) and len(prompt_lower) < 8):
         guardar_respuesta("¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?")
         st.stop()
 
-    # VERIFICACIÓN DE RETROALIMENTACIÓN MANUAL
+    # VERIFICACIÓN DE RETROALIMENTACIÓN MANUAL INSTANTÁNEA
     if prompt_normalizado in st.session_state.memoria_aprendizaje:
         guardar_respuesta(st.session_state.memoria_aprendizaje[prompt_normalizado])
         st.stop()
 
-    # INTERCEPCIÓN DE ARCHIVO MAESTRO
+    # Intercepciones directas del manual de tienda
     respuesta_directa = ""
     if any(g in prompt_lower for g in ["gotera", "filtracion", "tiene goteras", "tengo filtraciones", "ya tiene"]):
         if "azotea" in historial_texto or "techo" in historial_texto or "losa" in historial_texto:
@@ -165,19 +165,26 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
         guardar_respuesta(respuesta_directa)
         st.stop()
 
-    # Ejecutar el buscador
+    if es_sondeo_inicial_azotea(prompt_lower, historial_texto):
+        guardar_respuesta(
+            "Con gusto te ayudo a elegir el sistema ideal para tu azotea. Antes de sugerirte el producto específico, "
+            "compárteme de favor: ¿tu azotea cuenta actualmente con filtraciones o goteras activas, o es un trabajo netamente preventivo?"
+        )
+        st.stop()
+
+    # Ejecución normal del buscador
     contexto_manuales = buscar_fichas(prompt, historial_texto)
     mensaje_no_info = "No tengo esa información exacta en las fichas cargadas. Por favor comunícate con un especialista al **3317011786**."
 
     contexto_sistema = f"""
-Eres el Asesor Técnico Senior de Fester México. Tu tono es profesional, claro, atento y muy conciso. Responde en máximo 2 párrafos cortos.
+Eres el Asesor Técnico Senior de Fester México. Tu tono es profesional, claro, atento y muy conciso. Máximo 2 párrafos cortos.
 
 REGLAS CRÍTICAS DE INGENIERÍA:
 1. Recuerda que Fester Acritón Pro Shield Max es un sistema ELASTOMÉRICO 100% ACRÍLICO BASE AGUA. Está prohibido decir que contiene poliuretano o solventes.
-2. Si te preguntan por problemas de HUMEDAD O SALITRE EN EL MURO o PARED, la recomendación oficial según tu manual de tienda es el FESTER CR-65 y se explica brevemente su proceso (retirar enjarre, limpiar superficie, resanar con CM-200, dos manos cruzadas y curado obligatorio con agua).
-3. Si los datos del texto oficial inferior vienen vacíos o no corresponden al área platicada, responde textualmente: {mensaje_no_info}
+2. Si te preguntan por problemas de HUMEDAD O SALITRE EN EL MURO o PARED, la recomendación oficial según tu manual de tienda es el FESTER CR-65 (retirar enjarre, limpiar superficie, resanar con CM-200, dos manos cruzadas y curado obligatorio con agua).
+3. Si los datos del texto oficial inferior vienen vacíos o no corresponden, responde exactamente: {mensaje_no_info}
 
-TEXTO REAL EXTRAÍDO PARA RESPONDER:
+TEXTO REAL EXTRAÍDO PARA RESPONDER HOY:
 {contexto_manuales if contexto_manuales else ''}
 """
 
@@ -187,12 +194,4 @@ TEXTO REAL EXTRAÍDO PARA RESPONDER:
                 model=MODELO_FAVORITO,
                 messages=[
                     {"role": "system", "content": contexto_sistema},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.0,
-                max_tokens=450
-            )
-            response = completion.choices[0].message.content
-            
-            if mensaje_no_info in response or "3317011786" in response:
-                st.markdown(response)
+
