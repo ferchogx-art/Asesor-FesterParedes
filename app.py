@@ -8,7 +8,7 @@ st.set_page_config(page_title="Asesor Técnico Fester", page_icon="🏗️", lay
 st.title("🏗️ Asesor Técnico FesterParedes IA")
 st.write("Sistema experto con consulta prioritaria a tu manual de mostrador.")
 
-# 1. Conectar con la API de Groq usando tu modelo preferido FIJO
+# 1. Conectar con la API de Groq
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
 if not api_key:
     st.error("Falta configurar la clave GROQ_API_KEY en los Secrets.")
@@ -17,7 +17,17 @@ if not api_key:
 client = Groq(api_key=api_key)
 MODELO_FAVORITO = "openai/gpt-oss-120b"
 
-# 2. Carga inteligente de PDFs y Manuales de Tienda
+# 2. Inicializar memorias en el servidor
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "memoria_aprendizaje" not in st.session_state:
+    st.session_state.memoria_aprendizaje = {}
+if "mostrar_caja_retro" not in st.session_state:
+    st.session_state.mostrar_caja_retro = False
+if "pregunta_pendiente" not in st.session_state:
+    st.session_state.pregunta_pendiente = ""
+
+# 3. Carga inteligente de PDFs
 @st.cache_resource
 def extraer_conocimiento_fester():
     texto_completo = []
@@ -31,6 +41,7 @@ def extraer_conocimiento_fester():
                     if texto_pag.strip():
                         texto_completo.append({
                             "origen": nombre_archivo,
+                            "referencia": f"Pág. {num_pag + 1}",
                             "texto": texto_pag,
                         })
         except Exception as error:
@@ -38,117 +49,123 @@ def extraer_conocimiento_fester():
     return texto_completo
 
 base_conocimiento = extraer_conocimiento_fester()
-num_bloques = len(base_conocimiento)
-st.success(f"📊 Sistema en línea: {num_bloques} páginas de fichas técnicas cargadas.")
+st.success(f"📟 Sistema en línea: {len(base_conocimiento)} páginas de fichas técnicas cargadas.")
 
-# Historial de Chat
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "memoria_aprendizaje" not in st.session_state:
-    st.session_state.memoria_aprendizaje = {}
-if "mostrar_caja_retro" not in st.session_state:
-    st.session_state.mostrar_caja_retro = False
-if "pregunta_pendiente" not in st.session_state:
-    st.session_state.pregunta_pendiente = ""
+# 4. Función de normalización de códigos
+def normalizar_termino(texto):
+    return re.sub(r'[-.\s®™]', '', texto.lower())
 
+def buscar_fichas(consulta, historial):
+    consulta_limpia = f"{consulta} {historial}".lower()
+    consulta_norm = normalizar_termino(consulta_limpia)
+    
+    # ENRUTAMIENTO ESTRICTO POR CÓDIGO DE PRODUCTO
+    es_cr66 = "cr66" in consulta_norm
+    es_cl52 = "cl52" in consulta_norm or "charola" in consulta_norm or "baño" in consulta_norm
+    es_cr65 = "cr65" in consulta_norm or "salitre" in consulta_norm
+    es_vaportite = "vaportite" in consulta_norm or "chapopote" in consulta_norm or "asfalto" in consulta_norm
+    es_acriton = "acriton" in consulta_norm or "proshield" in consulta_norm or "techo" in consulta_norm or "losa" in consulta_norm
+
+    resultados = []
+    for item in base_conocimiento:
+        texto_norm = normalizar_termino(item["texto"])
+        nombre_norm = normalizar_termino(item["origen"])
+        
+        # APLICACIÓN DE CANDADOS RADICALES DE EXCLUSIÓN
+        if es_cr66 and "cr66" not in nombre_norm and "tienda" not in nombre_norm:
+            continue
+        if es_cl52 and "cl52" not in nombre_norm and "cl-52" not in nombre_norm and "tienda" not in nombre_norm:
+            continue
+        if es_cr65 and "cr65" not in nombre_norm and "tienda" not in nombre_norm:
+            continue
+        if es_vaportite and "vaportite" not in nombre_norm and "tienda" not in nombre_norm:
+            continue
+        if es_acriton and ("cl" in nombre_norm or "cr" in nombre_norm or "vaportite" in nombre_norm) and "tienda" not in nombre_norm:
+            continue
+
+        puntos = 0
+        if "tienda" in nombre_norm or "respuestas" in nombre_norm:
+            puntos += 100  # Máxima prioridad absoluta a tu PDF de la tienda
+        
+        if "cr66" in consulta_norm and "cr66" in nombre_norm: puntos += 50
+        if "cl52" in consulta_norm and "cl52" in nombre_norm: puntos += 50
+        if "festerbond" in consulta_norm and "festerbond" in nombre_norm: puntos += 50
+
+        # Coincidencias de texto básico
+        palabras = [p for p in re.findall(r"[\wáéíóúüñ-]+", consulta_limpia) if len(p) > 2]
+        for p in palabras:
+            if p in item["texto"].lower(): puntos += 5
+
+        if puntos > 0:
+            resultados.append((puntos, item))
+
+    if resultados:
+        resultados.sort(key=lambda x: x[0], reverse=True) # Arreglado el ordenamiento numérico por índice de puntos
+    return "".join(f"\n[Ficha: {item['origen']}]\n{item['texto']}\n" for _, item in resultados[:2])
+
+# 5. Pintar historial en pantalla
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-def guardar_respuesta(respuesta):
-    with st.chat_message("assistant"):
-        st.markdown(respuesta)
-    st.session_state.messages.append({"role": "assistant", "content": respuesta})
+# 6. Caja de Aprendizaje en Vivo (Retroalimentación)
+if st.session_state.mostrar_caja_retro:
+    with st.expander("🎓 ¡Profesor FesterParedes! Enséñale la respuesta correcta a la IA", expanded=True):
+        st.info(f"Escribe cómo responder a: *\"{st.session_state.pregunta_pendiente}\"*")
+        nueva_respuesta = st.text_area("Escribe la solución oficial de la tienda aquí:")
+        if st.button("Guardar lección en la memoria de la IA"):
+            if nueva_respuesta.strip():
+                clave_memoria = normalizar_termino(st.session_state.pregunta_pendiente)
+                st.session_state.memoria_aprendizaje[clave_memoria] = nueva_respuesta.strip()
+                st.success("¡Entendido! He aprendido la lección de mostrador.")
+                st.session_state.mostrar_caja_retro = False
+                st.rerun()
 
-# 3. Buscador Inteligente con Filtrado y Filtro de Prioridad Absoluta de Tienda
-def buscar_fichas(consulta, historial):
-    consulta_limpia = f"{consulta} {historial}".lower()
-    
-    # Segmentación por zona de la obra
-    es_charola = any(x in consulta_limpia for x in ["charola", "baño", "regadera", "cl52", "cl-52"])
-    es_salitre = any(x in consulta_limpia for x in ["salitre", "cr65", "cr-65"])
-    es_asfalto = any(x in consulta_limpia for x in ["chapopote", "asfalto", "vaportite", "desplante"])
-    es_techo = any(x in consulta_limpia for x in ["techo", "losa", "azotea", "acriton", "fester a", "proshield"])
-    es_cr66 = any(x in consulta_limpia for x in ["cr66", "cr-66", "cisterna", "alberca"])
-
-    palabras = [p for p in re.findall(r"[\wáéíóúüñ-]+", consulta_limpia) if len(p) > 2]
-
-    # SEPARACIÓN DE BLOQUES: Buscaremos primero si tu manual de respuestas de la tienda tiene la información
-    resultados_tienda = []
-    resultados_fabrica = []
-    
-    for item in base_conocimiento:
-        texto = item["texto"].lower()
-        nombre = item["origen"].lower()
-        
-        # Filtros de exclusión drásticos para los PDFs de fábrica
-        if "tienda" not in nombre and "respuestas" not in nombre:
-            if es_charola and "cl" not in nombre:
-                continue
-            if es_salitre and "cr65" not in nombre:
-                continue
-            if es_asfalto and "vaportite" not in nombre:
-                continue
-            if es_techo and ("cl" in nombre or "cr" in nombre or "cf" in nombre):
-                continue
-            if es_cr66 and "cr66" not in nombre:
-                continue
-
-        puntos = sum(5 for palabra in palabras if palabra in texto)
-        puntos += sum(35 for palabra in palabras if palabra in nombre)
-        
-        if puntos > 0:
-            if "tienda" in nombre or "respuestas" in nombre:
-                resultados_tienda.append((puntos + 100, item)) # Súper bono para tu manual de mostrador
-            else:
-                resultados_fabrica.append((puntos, item))
-
-    # REGLA DE ORO: Si tu manual de tienda tiene coincidencia, ignora los PDFs de fábrica por completo
-    contexto_final = ""
-    if resultados_tienda:
-        resultados_tienda.sort(key=lambda x: x, reverse=True)
-        for _, res in resultados_tienda[:1]:
-            contexto_final += f"\n[MANUAL DE TIENDA OFICIAL: {res['origen']}]\n{res['texto']}\n"
-    else:
-        if resultados_fabrica:
-            resultados_fabrica.sort(key=lambda x: x, reverse=True)
-            for _, res in resultados_fabrica[:1]:
-                contexto_final += f"\n[Ficha de Fábrica de Respaldo: {res['origen']}]\n{res['texto']}\n"
-                
-    return contexto_final
-
-# 4. Procesamiento del chat
+# 7. Entrada del usuario
 if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto deseas validar?"):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     prompt_lower = prompt.lower().strip()
+    prompt_normalizado = normalizar_termino(prompt_lower)
     historial_texto = " ".join(m["content"] for m in st.session_state.messages[-4:]).lower()
 
-    if re.search(r"\b(hola|holis|buen[oa]s?|saludos|qu[eé]\s+tal)\b", prompt_lower):
-        guardar_respuesta("¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?")
-        st.stop()
+    # Intercepción flexible de saludos
+    if re.search(r"\b(hola|holis|buen[oa]s?|saludos|qu[eé]\s+tal|buenas\s+tardes|buenos\s+dias)\b", prompt_lower):
+        with st.chat_message("assistant"):
+            res = "¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?"
+            st.markdown(res)
+            st.session_state.messages.append({"role": "assistant", "content": res})
+            st.stop()
 
-    # Verificar aprendizaje local en vivo
-    prompt_limpio_cod = re.sub(r'[^a-z0-9ñ]', '', prompt_lower)
-    if prompt_limpio_cod in st.session_state.memoria_aprendizaje:
-        guardar_respuesta(st.session_state.memoria_aprendizaje[prompt_limpio_cod])
-        st.stop()
+    # Buscar en memoria de aprendizaje manual
+    respuesta_aprendida = ""
+    for clave, valor in st.session_state.memoria_aprendizaje.items():
+        if clave in prompt_normalizado or prompt_normalizado in clave:
+            respuesta_aprendida = valor
+            break
 
+    if respuesta_aprendida:
+        with st.chat_message("assistant"):
+            st.markdown(respuesta_aprendida)
+            st.session_state.messages.append({"role": "assistant", "content": respuesta_aprendida})
+            st.stop()
+
+    # Ejecutar el buscador blindado por código de producto
     contexto_manuales = buscar_fichas(prompt, historial_texto)
-    mensaje_no_info = "No tengo esa información exacta en las fichas cargadas. Por favor comunícate con un especialista al **3317011786**."
+    mensaje_no_info = "No comprendo del todo tu solicitud o la información exacta no viene en las fichas. Por favor comunícate con un especialista al **3317011786**."
 
     contexto_sistema = f"""
-Eres el Asesor Técnico Senior de Fester México. Tu tono es amable, ultra conciso, práctico y profesional. Máximo 2 párrafos cortos.
+Eres el Asesor Técnico Senior de Fester México. Tu tono es profesional, claro y ultra conciso. Responde en un máximo de 1 o 2 párrafos cortos.
 
-REGLAS CRÍTICAS:
-1. Usa con absoluta prioridad la información que diga 'MANUAL DE TIENDA OFICIAL'. Si el texto de abajo contiene las respuestas de mostrador redactadas por el dueño de FesterParedes, copia y apega textualmente sus rendimientos, condiciones y pasos.
-2. Si te preguntan qué recomiendas para una azotea o techo, ejecuta estrictamente el sistema de sondeo que viene redactado en tu manual: pregunta si es preventivo o si ya hay filtraciones, tipo de superficie, humedad, durabilidad, etc.
-3. Si el texto inferior viene vacío o no tiene relación directa con la duda, responde textualmente con el mensaje de asistencia técnica telefónica: {mensaje_no_info}
+REGLAS CRÍTICAS DE INGENIERÍA:
+1. UNIDADES DE MEDIDA DE CONSUMO: Entrega rendimientos basándote estrictamente en el texto de abajo. Si hablas de Fester CR-66, el rendimiento oficial es en KILOGRAMOS (kg/m²) o por JUEGO COMPLETO, nunca en litros.
+2. Si te preguntan por una AZOTEA o LOSA, antes de recomendar, sondea obligatoriamente de forma amable si ya cuentan con filtraciones activas o si es mera prevención para dar la opción idónea según tu manual.
+3. Si los datos del texto oficial inferior vienen vacíos o no tienen relación, di exactamente: {mensaje_no_info}
 
-TEXTO OFICIAL EXTRAÍDO PARA RESPONDER HOY:
-{contexto_manuales if contexto_manuales else ''}
+TEXTO REAL EXTRAÍDO DE LAS FICHAS TÉCNICAS SELECCIONADAS:
+{contexto_manuales if contexto_manuales else 'Vacio'}
 """
 
     with st.chat_message("assistant"):
@@ -160,25 +177,20 @@ TEXTO OFICIAL EXTRAÍDO PARA RESPONDER HOY:
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.0,
-                max_tokens=500,
+                max_tokens=500
             )
-            # CORRECCIÓN DE EXTRACCIÓN MAESTRA CON EL ÍNDICE EXTRA PARA TU MODELO
-            response = completion.choices.message.content
             
-            if mensaje_no_info in response or "3317011786" in response:
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
+            # NUEVA SINTAXIS SEGURA SELECCIONANDO EL CONTENIDO DE LA RESPUESTA DE GROQ DIRECTAMENTE
+            response = completion.choices[0].message.content
+            
+            if "3317011786" in response or "No comprendo" in response:
+                st.session_state.pregunta_pendiente = prompt
+                st.session_state.mostrar_caja_retro = True
                 
-                st.warning("💡 MODO APRENDIZAJE ACTIVO: Agrega la respuesta oficial para enseñarle a la IA:")
-                with st.form(key=f"form_retro_{prompt_limpio_cod}"):
-                    solucion_tienda = st.text_area("Escribe la recomendación de mostrador aquí:")
-                    if st.form_submit_button("Guardar en el cerebro de la IA") and solucion_tienda.strip():
-                        st.session_state.memoria_aprendizaje[prompt_limpio_cod] = solucion_tienda.strip()
-                        st.success("¡Guardado! He aprendido la lección para la próxima vez.")
-            else:
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            if st.session_state.mostrar_caja_retro:
+                st.rerun()
         except Exception as error:
             st.error(f"Error en motor IA: {error}")
-
 
