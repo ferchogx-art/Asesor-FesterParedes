@@ -30,7 +30,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-MODELO = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+model="openai/gpt-oss-120b",
 MEMORIA_PATH = Path(os.environ.get("FESTER_MEMORY_FILE", "memoria_aprendizaje.json"))
 MENSAJE_SIN_RESPUESTA = (
     "No encuentro información oficial suficiente para responder con seguridad. "
