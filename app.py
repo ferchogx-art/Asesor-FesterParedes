@@ -14,9 +14,9 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-# ID oficial, vigente y permanente en la red de producción de Groq
-# Línea 19: Cambiamos al ID oficial activo y permanente del servidor
-model="openai/gpt-oss-120b",
+
+# CORRECCIÓN: Se quitó la coma del final para que sea un String válido
+model_id = "openai/gpt-oss-120b"
 
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
@@ -92,7 +92,7 @@ Si el usuario te pregunta por un producto, rendimiento, resistencia o solución 
     with st.chat_message("assistant"):
         try:
             completion = client.chat.completions.create(
-                model=MODELO_FAVORITO,
+                model=model_id,  # CORRECCIÓN: Ahora usa la variable correcta definida arriba
                 messages=[
                     {"role": "system", "content": contexto_sistema},
                     {"role": "user", "content": prompt}
