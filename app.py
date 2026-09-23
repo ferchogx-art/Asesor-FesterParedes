@@ -7,17 +7,15 @@ st.set_page_config(page_title="Asesor FesterParedes", page_icon="🏗️", layou
 st.title("🏗️ Asesor Técnico FesterParedes IA")
 st.write("Sistema experto desde cero. ¡Tú eres el profesor de esta IA!")
 
-# 1. Conectar con la API de Groq usando el modelo vigente definitivo
+# 1. Conectar con la API de Groq usando el modelo de producción definitivo
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
 if not api_key:
     st.error("Falta configurar la clave GROQ_API_KEY en los Secrets de Streamlit.")
     st.stop()
 
 client = Groq(api_key=api_key)
-# Modelo insignia actual, activo y permanente en los servidores
-# Línea 18: Cambiamos al modelo base oficial y permanente de producción
-MODELO_FAVORITO = "llama-3.1-8b-instant"
-
+# DEFINICIÓN FIJA Y COMPATIBLE: Dejamos el ID oficial estable de producción
+MODELO_VIGENTE = "llama-3.1-8b-instant"
 
 # 2. Inicializar memorias de conversación y aprendizaje
 if "messages" not in st.session_state:
@@ -40,7 +38,7 @@ def limpiar_texto(texto):
 
 # 3. Formulario de Aprendizaje Activo (Aparece si la IA no sabe la respuesta)
 if st.session_state.mostrar_formulario:
-    st.warning(f"🎓 Modo Aprendizaje Activo")
+    st.warning("🎓 Modo Aprendizaje Activo")
     st.info(f"Enséñame cómo responder a: *\"{st.session_state.pregunta_sin_responder}\"*")
     with st.form(key="form_leccion_mostrador"):
         leccion = st.text_area("Escribe aquí la recomendación oficial de la tienda:")
