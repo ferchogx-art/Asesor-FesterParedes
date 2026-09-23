@@ -15,7 +15,9 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 # ID oficial, vigente y permanente en la red de producción de Groq
-MODELO_FAVORITO = "llama-3.1-8b-instant"
+# Línea 19: Cambiamos al ID oficial activo y permanente del servidor
+MODELO_VIGENTE = "llama-3.3-70b-versatile"
+
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
 if "messages" not in st.session_state:
