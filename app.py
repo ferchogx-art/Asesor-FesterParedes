@@ -15,7 +15,9 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 # Modelo insignia actual, activo y permanente en los servidores
-MODELO_VIGENTE = "llama-3.3-70b-specdec"
+# Línea 18: Cambiamos al modelo base oficial y permanente de producción
+MODELO_FAVORITO = "llama-3.1-8b-instant"
+
 
 # 2. Inicializar memorias de conversación y aprendizaje
 if "messages" not in st.session_state:
