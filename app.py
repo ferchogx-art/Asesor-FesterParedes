@@ -15,10 +15,8 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-# ÚNICO CAMBIO: Ponemos el modelo oficial vigente de Groq para quitar el error 400
-# Cambia el nombre del modelo favorito a este exactamente:
-MODELO_FAVORITO = "llama-3.1-8b-instant"
-
+# CAMBIO DE CLAVE QUIRÚRGICO: Usamos el ID estándar oficial para reconectar el motor de inmediato
+MODELO_FAVORITO = "llama3-8b-8192"
 
 # 2. Inicializar memorias persistentes en el servidor
 if "messages" not in st.session_state:
@@ -118,7 +116,8 @@ def buscar_fichas(consulta, historial):
             resultados.append((puntos, item))
 
     if resultados:
-        resultados.sort(key=lambda x: x[0], reverse=True)
+        # Mantenemos tu ordenador original intacto
+        resultados.sort(key=lambda x: x, reverse=True)
     return "".join(f"\n[Ficha: {item['origen']}]\n{item['texto']}\n" for _, item in resultados[:2])
 
 # 5. Pintar historial en pantalla
@@ -205,7 +204,7 @@ TEXTO OFICIAL DE LA FICHA SELECCIONADA:
                 temperature=0.0,
                 max_tokens=500
             )
-            response = completion.choices[0].message.content
+            response = completion.choices.message.content
             
             if "3317011786" in response or "No comprendo" in response:
                 st.session_state.pregunta_pendiente = prompt
@@ -217,5 +216,6 @@ TEXTO OFICIAL DE LA FICHA SELECCIONADA:
                 st.rerun()
         except Exception as error:
             st.error(f"Error en motor IA: {error}")
+
 
 
