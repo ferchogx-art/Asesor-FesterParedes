@@ -16,7 +16,9 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 # ÚNICO CAMBIO: Ponemos el modelo oficial vigente de Groq para quitar el error 400
-MODELO_FAVORITO = "llama-3.3-70b-versatile"
+# Cambia el nombre del modelo favorito a este exactamente:
+MODELO_FAVORITO = "llama-3.1-8b-instant"
+
 
 # 2. Inicializar memorias persistentes en el servidor
 if "messages" not in st.session_state:
