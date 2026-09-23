@@ -15,8 +15,8 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-# Cambiamos al modelo oficial Llama 3 para asegurar máxima velocidad en mostrador
-MODELO_FAVORITO = "llama3-8b-8192"
+# ÚNICO CAMBIO: Ponemos el modelo oficial vigente de Groq para quitar el error 400
+MODELO_FAVORITO = "llama-3.3-70b-versatile"
 
 # 2. Inicializar memorias persistentes en el servidor
 if "messages" not in st.session_state:
@@ -116,7 +116,6 @@ def buscar_fichas(consulta, historial):
             resultados.append((puntos, item))
 
     if resultados:
-        # Arreglamos de raíz el ordenador numérico apuntando al índice cero
         resultados.sort(key=lambda x: x[0], reverse=True)
     return "".join(f"\n[Ficha: {item['origen']}]\n{item['texto']}\n" for _, item in resultados[:2])
 
@@ -128,13 +127,13 @@ for message in st.session_state.messages:
 # 6. Caja de Aprendizaje en Vivo (Retroalimentación)
 if st.session_state.mostrar_caja_retro:
     with st.expander("🎓 ¡Profesor FesterParedes! Enséñale la respuesta correcta a la IA", expanded=True):
-        st.info(f"Escribe cómo responder a: *\"{st.session_state.pregunta_pendiente}\"*")
+        st.info(f"Escribe cómo responder a: \"{st.session_state.pregunta_pendiente}\"")
         nueva_respuesta = st.text_area("Escribe la solución oficial de la tienda aquí:")
         if st.button("Guardar lección en la memoria de la IA"):
             if nueva_respuesta.strip():
                 clave_memoria = normalizar_termino(st.session_state.pregunta_pendiente)
                 st.session_state.memoria_aprendizaje[clave_memoria] = nueva_respuesta.strip()
-                st.success("¡Entendido! He aprendido la lección de mostrador.")
+                st.success("¡Entendido! He aprendido la lección.")
                 st.session_state.mostrar_caja_retro = False
                 st.rerun()
 
@@ -148,7 +147,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
     prompt_normalizado = normalizar_termino(prompt_lower)
     historial_texto = " ".join(m["content"] for m in st.session_state.messages[-4:]).lower()
 
-    # Saludos interceptados de forma flexible
+    # Saludos
     if re.search(r"\b(hola|holis|buen[oa]s?|saludos|qu[eé]\s+tal|buenas\s+tardes|buenos\s+dias)\b", prompt_lower):
         with st.chat_message("assistant"):
             res = "¡Hola! Soy tu amigo Asesor FesterParedes, a la orden. ¿En qué te puedo apoyar hoy?"
@@ -156,7 +155,7 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
             st.session_state.messages.append({"role": "assistant", "content": res})
             st.stop()
 
-    # 🚨 FILTRO MEJORADO DE PRIORIDAD: Si hay coincidencia flexible en tu memoria, se salta los PDFs y responde esto de inmediato
+    # Buscar en memoria de aprendizaje
     respuesta_aprendida = ""
     for clave, valor in st.session_state.memoria_aprendizaje.items():
         if clave in prompt_normalizado or prompt_normalizado in clave:
@@ -169,9 +168,9 @@ if prompt := st.chat_input("¿Qué problema tienes en obra o qué producto desea
             st.session_state.messages.append({"role": "assistant", "content": respuesta_aprendida})
             st.stop()
 
-    # Búsqueda normal en PDFs si no está en la memoria en vivo
+    # Búsqueda en PDFs
     contexto_manuales = buscar_fichas(prompt, historial_texto)
-    mensaje_no_info = "No comprendo del todo tu solicitud o la información exacta no viene en las fichas. Por favor comunícate con un especialista al **3317011786**."
+    mensaje_no_info = "No comprendo del todo tu solicitud o la información exacta no viene en las fichas. Por favor comunícate con un especialista al *3317011786*."
 
     if not contexto_manuales.strip():
         with st.chat_message("assistant"):
@@ -204,7 +203,6 @@ TEXTO OFICIAL DE LA FICHA SELECCIONADA:
                 temperature=0.0,
                 max_tokens=500
             )
-            # Agregamos el índice de la lista para que lea de corrido sin trabas
             response = completion.choices[0].message.content
             
             if "3317011786" in response or "No comprendo" in response:
