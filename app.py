@@ -117,7 +117,7 @@ def buscar_fichas(consulta, historial):
 
     if resultados:
         # Mantenemos tu ordenador original intacto
-        resultados.sort(key=lambda x: x, reverse=True)
+        resultados.sort(key=lambda x: x[0], reverse=True)
     return "".join(f"\n[Ficha: {item['origen']}]\n{item['texto']}\n" for _, item in resultados[:2])
 
 # 5. Pintar historial en pantalla
