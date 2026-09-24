@@ -16,7 +16,7 @@ if not api_key:
 client = Groq(api_key=api_key)
 
 # CORRECCIÓN: Se quitó la coma del final para que sea un String válido
-model_id = "llama-3.3-70b-versatile"
+model_id = "openai/gpt-oss-120b"
 
 
 
