@@ -158,7 +158,7 @@ Fester Epoxine 300 Resanador: Volumétrico (1 L llena el mismo volumen equivalen
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.0,
-                max_tokens=500
+                max_tokens=1000
             )
             response = completion.choices[0].message.content  # CORRECCIÓN: Sintaxis correcta de choices en Groq
             
