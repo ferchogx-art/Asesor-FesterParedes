@@ -154,7 +154,7 @@ Fester Epoxine 300 Resanador: Volumétrico (1 L llena el mismo volumen equivalen
             completion = client.chat.completions.create(
                 model=model_id,
                 messages=[
-                    {"role": "system", "content": contexto_sistema},
+                    {"role": "system", "content": CONTEXTO_SISTEMA},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.0,
