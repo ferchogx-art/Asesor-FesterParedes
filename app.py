@@ -4,7 +4,7 @@ import streamlit as st
 from groq import Groq
 
 st.set_page_config(page_title="Asesor FesterParedes", page_icon="🏗️", layout="centered")
-st.title("🏗️ Asesor Técnico FesterParedes IA")
+st.title("🏗️🤖 Asesor Técnico FesterParedes IA")
 st.write("Sistema maestro desde cero. ¡Tú eres el profesor de esta IA!")
 
 # 1. Conectar con la API de Groq usando el modelo permanente
