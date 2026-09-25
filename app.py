@@ -153,7 +153,7 @@ Fester Epoxine 300 Resanador: Volumétrico (1 L llena el mismo volumen equivalen
 with st.chat_message("assistant"):
         try:
             # CORRECCIÓN DE MEMORIA: Juntamos el sistema con todo el historial acumulado
-            mensajes_api = [{"role": "system", "content": CONTEXTO_SISTEMA}]
+            mensajes_api = [{"role": "system", "content": contexto_sistema}]
             for msg in st.session_state.messages:
                 mensajes_api.append({"role": msg["role"], "content": msg["content"]})
 
