@@ -110,7 +110,7 @@ FESTER CR-NANOTECH ADMIX: Aditivo en polvo preventivo que se agrega DESDE LA MEZ
 FESTER CX-01: Mortero obturador de FRAGUADO INSTANTÁNEO (1 min) para flujos y salidas francas de agua activa.
 FESTER EPOXINE 200: Adhesivo estructural epóxico para unir concreto nuevo a viejo.
 FESTER EPOXINE 800 GROUT: Grout epóxico industrial de 3 componentes para basamento de maquinaria pesada (>100 L).
-FESTERBOND: Adhesivo multiusos base acrílica (fortificador, adherente y sellador). No estructural.
+FESTERBOND: Sellador de uso multiple fabricado a base de resinas acrilicas, que resiste la humedad (Resina tipo 2). Si se mezcla dentro de morteros, mezclas, pastas y lechadas como aditivo fortificador (dosificacion tipica: 1 litro por cada 5 kg de cemento) para mejorar la consistencia, plasticidad y dureza superficial. Tambien se usa como adherente superficial (puente de union) para pegar mortero nuevo a concreto viejo en aplanados, reparaciones esteticas y firmes. No se debe usar para uniones estructurales de carga (trabes, columnas o losas de concreto nuevo a viejo); en esos casos el unico i ndicado es el fester epoxine 200.
 FESTERFLEX: Membrana de refuerzo no tejida específica para sistemas impermeables ASFÁLTICOS en frío.
 FESTEGRAL: Aditivo integral en polvo para reducir permeabilidad en concreto/mortero por colar.
 FESTERGROUT NM 400: Grout cementoso sin contracción (400 kg/cm²). Poca o nula vibración.
