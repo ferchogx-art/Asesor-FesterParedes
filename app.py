@@ -100,7 +100,7 @@ FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos elastoméricos de secado rápido
 FESTER CF-890: Anclaje químico poliéster en cartucho de 300 mL. Catalización extra rápida.
 FESTER CF-1000: Anclaje químico epóxico estructural alto desempeño. Cartucho de 585 mL. Soporta concreto húmedo.
 FESTER CL-52: Impermeabilizante para interiores ANTES de colocar azulejo (baños/cocinas). No techos expuestos.
-FESTER CM-200: Mortero pastoso para reparación NO estructural de concreto.
+FESTER CM-200: Mortero pastoso para reparación NO estructural de concreto. secado rapido 1 hora.
 FESTER CM-201: Mortero pastoso de alta resistencia estructural/no estructural. Fraguado rápido (1 hora).
 FESTER CM-202: Mortero FLUIDO de alta resistencia estructural para colar en cimbras angostas.
 FESTER CR-65: Cementoso específico para SALITRE en muros de block/tabique (quitar aplanado o enjarres para una correcta funcionalidad de producto). El rendimiento puede variar de 5 mts2 a 8.5 mtrs2 dependiendo el tipo de problema a tratar, maxipo espesor de capa min 2mm a 5mm.
