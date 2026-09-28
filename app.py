@@ -99,7 +99,7 @@ FESTER ACRITON SELLADOR: Sellador/primario acrílico. 5 m²/L.Nota no se diluye 
 FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos elastoméricos de secado rápido.
 FESTER CF-890: Anclaje químico poliéster en cartucho de 300 mL. Catalización extra rápida.
 FESTER CF-1000: Anclaje químico epóxico estructural alto desempeño. Cartucho de 585 mL. Soporta concreto húmedo.
-FESTER CL-52: Impermeabilizante para interiores ANTES de colocar azulejo (baños/cocinas). No techos expuestos.
+FESTER CL-52: Impermeabilizante para interiores ANTES de colocar azulejo (baños/cocinas). No techos expuestos.se aplica primero un primario que se utiliza del mismo cl-52, dosificación, 1:2 es decir 1 litro de cl-52 por 2 litros de agua, se deja secar 3 horas y se inicia la primer capa de cl-52 sin diluir, seca 3 horas y aplicar segunda capa, posterior a 4 horas ya se puede aplicar el terminado,(azulejo, piso etc).
 FESTER CM-200: Mortero pastoso para reparación NO estructural de concreto. secado rapido 1 hora.
 FESTER CM-201: Mortero pastoso de alta resistencia estructural/no estructural. Fraguado rápido (1 hora).
 FESTER CM-202: Mortero FLUIDO de alta resistencia estructural para colar en cimbras angostas.
@@ -117,7 +117,7 @@ FESTERGROUT NM 400: Grout cementoso sin contracción (400 kg/cm²). Poca o nula 
 FESTERGROUT NM 600: Grout cementoso sin contracción (600 kg/cm²). Maquinaria exigente y precolados.
 FESTERGROUT NM 800: Grout cementoso sin contracción de máxima resistencia (800 kg/cm²). Aerogeneradores.
 FESTEX SILICÓN: Repelente hidrofugante incoloro para fachadas exteriores. Solo vertical/inclinado.
-FESTER EPOXINE 300 PRIMER: Primario epóxico de 2 componentes previo a Epoxine 300 Resanador.
+FESTER EPOXINE 300 PRIMER: Primario epóxico de 2 componentes previo a Epoxine 300 Resanador.solo para pisos industriales de alta abracion.
 FESTER EPOXINE 300 RESANADOR: Mortero epóxico para grietas/juntas SIN movimiento y bacheo de pisos (<1000 cm²).
 === GUÍA RÁPIDA DE DIAGNÓSTICO POR TIPO DE HUMEDAD, REPARACIÓN Y ANCLAJE ===
 Salitre en muros: Fester CR-65 directo al block. Fachada aparente sin salitre: Festex Silicón. Presión severa: Fester CR-Nanotech 99+.
