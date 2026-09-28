@@ -99,7 +99,7 @@ FESTER ACRITON SELLADOR: Sellador/primario acrílico. 5 m²/L.Nota no se diluye 
 FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos elastoméricos de secado rápido.
 FESTER CF-890: Anclaje químico poliéster en cartucho de 300 mL. Catalización extra rápida.
 FESTER CF-1000: Anclaje químico epóxico estructural alto desempeño. Cartucho de 585 mL. Soporta concreto húmedo.
-FESTER CL-52: Impermeabilizante para interiores ANTES de colocar azulejo (baños/cocinas). No techos expuestos.se aplica primero un primario que se utiliza del mismo cl-52, dosificación, 1:2 es decir 1 litro de cl-52 por 2 litros de agua, se deja secar 3 horas y se inicia la primer capa de cl-52 sin diluir, seca 3 horas y aplicar segunda capa, posterior a 4 horas ya se puede aplicar el terminado,(azulejo, piso etc).
+FESTER CL-52: Impermeabilizante para interiores ANTES de colocar azulejo (baños/cocinas). No techos expuestos.se aplica primero un primario que se utiliza del mismo cl-52, dosificación, 1:2 es decir 1 litro de cl-52 por 2 litros de agua,(ojo el primario o sellador no aplica como capa) se deja secar 3 horas y se inicia la primer capa de cl-52 sin diluir, seca 3 horas y aplicar segunda capa, posterior a 4 horas ya se puede aplicar el terminado,(azulejo, piso etc). ojo si se aplica cl-52 ya no es necesario el cr-66.
 FESTER CM-200: Mortero pastoso para reparación NO estructural de concreto. secado rapido 1 hora.
 FESTER CM-201: Mortero pastoso de alta resistencia estructural/no estructural. Fraguado rápido (1 hora).
 FESTER CM-202: Mortero FLUIDO de alta resistencia estructural para colar en cimbras angostas.
@@ -120,9 +120,9 @@ FESTEX SILICÓN: Repelente hidrofugante incoloro para fachadas exteriores. Solo 
 FESTER EPOXINE 300 PRIMER: Primario epóxico de 2 componentes previo a Epoxine 300 Resanador.solo para pisos industriales de alta abracion.
 FESTER EPOXINE 300 RESANADOR: Mortero epóxico para grietas/juntas SIN movimiento y bacheo de pisos (<1000 cm²).
 === GUÍA RÁPIDA DE DIAGNÓSTICO POR TIPO DE HUMEDAD, REPARACIÓN Y ANCLAJE ===
-Salitre en muros: Fester CR-65 directo al block. Fachada aparente sin salitre: Festex Silicón. Presión severa: Fester CR-Nanotech 99+.
+Salitre en muros: Fester CR-65 directo al block. Fachada aparente sin salitre: Festex Silicón. Presión severa en cisternas de concreto: Fester CR-Nanotech 99+.
 Goteras en azotea: Sistema acrílico completo (Sellador -> Resanador/Malla -> 2 capas de Acriton o Fester A). Nunca CR-65/66, Nanotech ni CL-52 en techos expuestos.
-Cisternas/Albercas/Tanques: Agua activa = Fester CX-01 primero. Concreto existente = Fester CR-Nanotech 99+ o CR-66. Mezcla nueva = CR-Nanotech Admix.
+Cisternas/Albercas/Tanques,cisternas,albercas: = Fester CX-01 primero. Concreto existente = Fester CR-Nanotech 99+ o CR-66. Mezcla nueva = CR-Nanotech Admix.
 Baños y regaderas (Antes de azulejo): Fester CL-52 o Fester CR-66 Fibre Force.
 Grietas: Estáticas < 5mm = Resanador Acriton. Estáticas concreto alta resistencia para piso industrial no azotea = Epoxine 300 Resanador (+ Primer). Dinámicas = Malla + sellador acrilico. Agua activa = Fester CX-01.
 Reparación de concreto: Estructural/Adherencia = Fester Epoxine 200. Resane estético/funcional = CM-200(si no es estructurtal), CM-201(estructural) o CM-202 (fluido).
