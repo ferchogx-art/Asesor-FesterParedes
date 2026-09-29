@@ -91,13 +91,15 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
     contexto_sistema = f"""
 Fester Epoxine 300 Resanador: Volumétrico (1 L llena el mismo volumen equivalente y funciona para fisuras en pisos industriales de alta abracion).
 === BASE DE CONOCIMIENTO DE PRODUCTOS ===
-FESTER ACRIFLEX: Membrana de refurzo de poliester tejido para sistemas impermeables.Diferencia clave con revoflex(que es un fieltro cerrado no tejido), la acriflex tiene una estructura de reticula abierta (cuadros). Al ser tejida, ofrece una resistencia estructural y a la tension aun mayor, siendo ideal para losas con juntas de expansion o zonas con movimientos estructurales severos. Se recomienda para impermeabilizantes de la linea acrilica como son FESTER A Y ACRITON. 
-Fester REVOFLEX: Fibra de poliester flexible de apariencia cerrada. Funcion: Diseñada para el refuerzo multidireccional de sistemas impermeables en frio y recubrimientos. Absorbe las tensiones fisicas provocadas por los movimientos de contraccion y dilatacion de las azoteas. La malla actua de forma integral o exclusivamente en zonas criticas( esquinas, grietas, bajadas de aguas, juntas). Se recomienda con impermeabilizantes acrilicos LINEA A Y ACRITONES.
+FESTER ACRIFLEX: Membrana de refurzo de poliester tejido para sistemas impermeables.Diferencia clave con revoflex(que es un fieltro cerrado no tejido), la acriflex tiene una estructura de reticula abierta (cuadros). Al ser tejida, ofrece una resistencia estructural y a la tension aun mayor, siendo ideal para losas con juntas de expansion o zonas con movimientos estructurales severos. Se recomienda para impermeabilizantes de la linea acrilica como son FESTER A Y ACRITON.Traslapes minimo de 10cm. 
+Fester REVOFLEX: Fibra de poliester flexible de apariencia cerrada. Funcion: Diseñada para el refuerzo multidireccional de sistemas impermeables en frio y recubrimientos. Absorbe las tensiones fisicas provocadas por los movimientos de contraccion y dilatacion de las azoteas. La malla actua de forma integral o exclusivamente en zonas criticas( esquinas, grietas, bajadas de aguas, juntas). Se recomienda con impermeabilizantes acrilicos LINEA A Y ACRITONES.Traslapes minimos de 10cm.
 FESTER ACRITON GREEN-SHIELD 10 AÑOS: Impermeabilizante acrílico ecológico reflectivo (Cool Roof). No inmersión.
-FESTER ACRITON RESANADOR: Resanador acrílico para grietas hasta 5mm estáticas.
+FESTER ACRITON RESANADOR: Resanador acrílico para grietas menores a 5mm estáticas. Se recomienda si la fisura es menor a 5mm, para aplicarlo debe estar limpio y sin polvo, posterior aplicar una capa de impermeabilizante y aplicar malla de refuerzo (revoflex o acriflex).
 FESTER ACRITON PROSHIELD MAX: Secado extra rápido (resiste lluvia en 30 min). Losas y láminas.
 FESTER ACRITON SELLADOR: Sellador/primario acrílico. 5 m²/L.Nota no se diluye se aplica directo. y nos funciona para los impermeabilizantes de la linea A e impermeabilizantes de la linea premium (Acriton).
 FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos elastoméricos de secado rápido.
+FESTER SUPERSEAL P:Sellador elastico de poliuretano(especial para fisuras mayores a 5mm hasta 25mm) monocomponente de secado rapido, diseñado para el tratamiento y sellado estructural de juntas y grietas. Resistencia termica, una vez curado no es toxico y mantiene un desempeño estable expuesto a la interperie en un rango de -25 C a 70 C. Si las fisuras en azotea son mayores a 5mm, se recomienda Superseal P.Presentacion de cartucho 300ml y salchica de 600ml. Rendimiento estimado un cartucho rinde hasta 10 metros lineales con 6mm de ancho y 5mm de profundidad. Antes de aplicar se recomienda que la cavidad este limpio sin polvo y ningun otro contaminante.
+FESTER FT201:Sellador elastico monocomponente para el sellado industrial y residencial de juntas constructivas dinamicas(sujetas a altos movimientos) tanto en interiores como exteriores.en resumen es un sellador para juntas de alto movimiento.Aplicaciones: juntas de expancion o dilatacion en fachadas, pisos comerciales, uniones entre placas de concreto, paneles de fibrocemento,paneles de aluminio y estructuras metalicas. Presentacion cartucho de 300ml y salchicha de 600ml. Rendimiento variable pero aproximadamente 9 metros lineales en juntas de 6mm de ancho por 5mm de profundidad por los 9 metros lineales.
 FESTER CF-890: Anclaje químico poliéster en cartucho de 300 mL. Catalización extra rápida.
 FESTER CF-1000: Anclaje químico epóxico estructural alto desempeño. Cartucho de 585 mL. Soporta concreto húmedo.
 FESTER CL-52: Impermeabilizante para interiores ANTES de colocar azulejo (baños/cocinas). No techos expuestos.se aplica primero un primario que se utiliza del mismo cl-52, dosificación, 1:2 es decir 1 litro de cl-52 por 2 litros de agua,(ojo el primario o sellador no aplica como capa) se deja secar 3 horas y se inicia la primer capa de cl-52 sin diluir, seca 3 horas y aplicar segunda capa, posterior a 4 horas ya se puede aplicar el terminado,(azulejo, piso etc). ojo si se aplica cl-52 ya no es necesario el cr-66.
@@ -131,8 +133,8 @@ Anclaje industrial: Volúmenes grandes = Epoxine 800 Grout. Cementosos = Festerg
 === DÓNDE COMPRAR / CONTACTO COMERCIAL ===
 Si preguntan por compras, precios o tiendas, di de forma muy cálida que Fester Paredes es distribuidor autorizado:
 Venta directa por WhatsApp al 3317011786.
-Tienda física: Av. Juan Gil Preciado #2001 Int. 8, Plaza Aleira, Zapopan.
-Redes: 'festerparedes' en Facebook e Instagram.
+Tienda física: Av. Juan Gil Preciado #2001 Int. 8,Plaza Aleira, Zapopan.
+Redes: 'FesterParedes' en Facebook e Instagram.
 === CUANDO NO TIENES LA RESPUESTA ===
 Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase exacta, sin inventar nada: {mensaje_auxilio}
 === ESTILO DE RESPUESTA ===
