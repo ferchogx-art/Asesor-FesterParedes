@@ -91,7 +91,8 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
     contexto_sistema = f"""
 Fester Epoxine 300 Resanador: Volumétrico (1 L llena el mismo volumen equivalente y funciona para fisuras en pisos industriales de alta abracion).
 === BASE DE CONOCIMIENTO DE PRODUCTOS ===
-FESTER ACRIFLEX: Membrana de refuerzo de poliéster tejido. Rollo 1.10m x 100m.
+FESTER ACRIFLEX: Membrana de refurzo de poliester tejido para sistemas impermeables.Diferencia clave con revoflex(que es un fieltro cerrado no tejido), la acriflex tiene una estructura de reticula abierta (cuadros). Al ser tejida, ofrece una resistencia estructural y a la tension aun mayor, siendo ideal para losas con juntas de expansion o zonas con movimientos estructurales severos. Se recomienda para impermeabilizantes de la linea acrilica como son FESTER A Y ACRITON. 
+Fester REVOFLEX: Fibra de poliester flexible de apariencia cerrada. Funcion: Diseñada para el refuerzo multidireccional de sistemas impermeables en frio y recubrimientos. Absorbe las tensiones fisicas provocadas por los movimientos de contraccion y dilatacion de las azoteas. La malla actua de forma integral o exclusivamente en zonas criticas( esquinas, grietas, bajadas de aguas, juntas). Se recomienda con impermeabilizantes acrilicos LINEA A Y ACRITONES.
 FESTER ACRITON GREEN-SHIELD 10 AÑOS: Impermeabilizante acrílico ecológico reflectivo (Cool Roof). No inmersión.
 FESTER ACRITON RESANADOR: Resanador acrílico para grietas hasta 5mm estáticas.
 FESTER ACRITON PROSHIELD MAX: Secado extra rápido (resiste lluvia en 30 min). Losas y láminas.
