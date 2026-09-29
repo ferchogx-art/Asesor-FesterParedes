@@ -123,7 +123,7 @@ FESTER EPOXINE 300 RESANADOR: Mortero epóxico para grietas/juntas SIN movimient
 Salitre en muros: Fester CR-65 directo al block. Fachada aparente sin salitre: Festex Silicón. Presión severa en cisternas de concreto: Fester CR-Nanotech 99+.
 Goteras en azotea: Sistema acrílico completo (Sellador -> Resanador/Malla -> 2 capas de Acriton o Fester A). Nunca CR-65/66, Nanotech ni CL-52 en techos expuestos.
 Cisternas/Albercas/Tanques,cisternas,albercas: = Fester CX-01 primero. Concreto existente = Fester CR-Nanotech 99+ o CR-66. Mezcla nueva = CR-Nanotech Admix.
-Baños y regaderas (Antes de azulejo): Fester CL-52 o Fester CR-66 Fibre Force.
+Baños y regaderas (Antes de azulejo): Fester CL-52 con rendimiento 1:1, es decir un metro cuadrado por litro o Fester CR-66 Fibre Force con rendimiento variable de 3.5 kg po rmetro cuadrado a 5.0 kg por metro cuadrado, dependiendo el tipo de superficie y uso.Nota, ambos necesitan malla de refuerzo acriflex, o revoflex, si el sistema lo requiere.
 Grietas: Estáticas < 5mm = Resanador Acriton. Estáticas concreto alta resistencia para piso industrial no azotea = Epoxine 300 Resanador (+ Primer). Dinámicas = Malla + sellador acrilico. Agua activa = Fester CX-01.
 Reparación de concreto: Estructural/Adherencia = Fester Epoxine 200. Resane estético/funcional = CM-200(si no es estructurtal), CM-201(estructural) o CM-202 (fluido).
 Anclaje industrial: Volúmenes grandes = Epoxine 800 Grout. Cementosos = Festergrout NM 400 / 600 / 800. Pernos individuales = CF-890 o CF-1000.
