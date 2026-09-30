@@ -4,22 +4,20 @@ import math
 import streamlit as st
 from groq import Groq
 
-# 1. Configuración de página e interfaz inicial
+# Configuración inicial de la página
 st.set_page_config(page_title="Asesor FesterParedes", page_icon="🏗️", layout="wide")
 st.title("🏗️ Asesor Técnico FesterParedes IA")
-st.write("Sistema maestro desde cero. ¡Tú eres el profesor de esta IA!")
+st.write("Sistema unificado. ¡Base de datos y calculadora en un solo lugar!")
 
-# 2. Conectar con la API de Groq usando el modelo permanente y actualizado
+# 1. Conectar con la API de Groq
 api_key = os.environ.get("GROQ_API_KEY", st.secrets.get("GROQ_API_KEY", ""))
 if not api_key:
     st.error("Falta configurar la clave GROQ_API_KEY en los Secrets de Streamlit.")
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama-3.3-70b-versatile"
- # ID de modelo actualizado y estable de Groq
 
-# 3. Inicializar memorias de conversación y lecciones de la tienda
+# 2. Inicializar memorias de conversación
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "cerebro_tienda" not in st.session_state:
@@ -29,89 +27,8 @@ if "pregunta_pendiente" not in st.session_state:
 if "mostrar_formulario" not in st.session_state:
     st.session_state.mostrar_formulario = False
 
-# Limpiador de texto para buscar coincidencias exactas en tu memoria
 def normalizar_texto(texto):
     return re.sub(r'[^a-z0-9ñ]', '', texto.lower().strip())
-
-# =========================================================================
-# 🧮 CALCULADORA OFICIAL EN LA BARRA LATERAL IZQUIERDA
-# =========================================================================
-with st.sidebar:
-    st.header("🧮 Calculadora de Materiales")
-    st.write("Cálculos exactos basados en fichas técnicas oficiales.")
-    
-    # Selector de Producto
-    producto_sel = st.selectbox(
-        "Selecciona el Producto:",
-        [
-            "Fester Acriton Green-Shield 10 años",
-            "Fester Acriton Proshield Max",
-            "Fester A (A3 / A5 / A7)",
-            "Fester Acriton Sellador",
-            "Fester CR-65",
-            "Fester CR-66 Fibre Force",
-            "Festerbond",
-            "Festergrout (NM 400 / 600 / 800)",
-            "Fester Vaportite 550",
-            "Fester Hidroprimer",
-            "Fester CM-200",
-            "Fester CM-201",
-            "Fester CM-202"
-        ]
-    )
-    
-    factor_rendimiento = 1.0
-    tipo_unidad = "L"
-    presentacion = "cubetas"
-    
-    # Lógica de Condiciones y Rendimientos Oficiales por Producto
-    if "Green-Shield" in producto_sel:
-        cond = st.selectbox("Condición:", ["Sin malla", "Con malla Revoflex", "Con malla Acriflex"])
-        rend = {"Sin malla": 1.0, "Con malla Revoflex": 1.2, "Con malla Acriflex": 1.5}
-        factor_rendimiento = rend[cond]
-        
-    elif "Proshield Max" in producto_sel:
-        cond = st.selectbox("Condición:", ["Normal o lámina", "Con fisuras sin malla", "Con malla Revoflex", "Con malla Acriflex", "Mantenimiento"])
-        rend = {"Normal o lámina": 1.0, "Con fisuras sin malla": 1.5, "Con malla Revoflex": 1.2, "Con malla Acriflex": 1.5, "Mantenimiento": 0.65}
-        factor_rendimiento = rend[cond]
-        
-    elif "Fester A " in producto_sel:
-        cond = st.selectbox("Condición:", ["Superficie normal", "Con malla de refuerzo"])
-        factor_rendimiento = 1.0 if cond == "Superficie normal" else 1.5
-        
-    elif "Acriton Sellador" in producto_sel:
-        st.info("Rendimiento fijo: 5 m² por litro (1 mano sin diluir)")
-        factor_rendimiento = 0.20
-        
-    elif "CR-65" in producto_sel:
-        cond = st.selectbox("Aplicación:", ["Humedad subsuelo (2 capas)", "Agua de lluvia (2 capas)", "Tanques de agua (3 capas)"])
-        rend = {"Humedad subsuelo (2 capas)": 3.0, "Agua de lluvia (2 capas)": 4.0, "Tanques de agua (3 capas)": 5.0}
-        factor_rendimiento = rend[cond]
-        tipo_unidad = "kg"
-        presentacion = "sacos"
-        
-    elif "CR-66" in producto_sel:
-        cond = st.selectbox(
-            "Aplicación:", 
-            [
-                "Muros de cimentación (3.5 kg/m²)", 
-                "Charolas de baño y cocinas (4 kg/m²)", 
-                "Muros de tabique, block o yeso (4 kg/m²)", 
-                "Albercas, cisternas y tanques (5 kg/m²)", 
-                "Balcones y terrazas (5 kg/m²)"
-            ]
-        )
-        rend = {
-            "Muros de cimentación (3.5 kg/m²)": 3.5, 
-            "Charolas de baño y cocinas (4 kg/m²)": 4.0, 
-            "Muros de tabique, block o yeso (4 kg/m²)": 4.0, 
-            "Albercas, cisternas y tanques (5 kg/m²)": 5.0, 
-            "Balcones y terrazas (5 kg/m²)": 5.0
-        }
-        factor_rendimiento = rend[cond]
-        tipo_unidad = "kg"
-        presentacion = "kits_cr66"
-        
     elif "Festerbond" in producto_sel:
         cond = st.selectbox("Uso como adherente:", ["Superficial puro", "Lechada / Fortificador tradicional"])
         factor_rendimiento = 0.18 if cond == "Superficial puro" else 0.20
@@ -136,7 +53,7 @@ with st.sidebar:
         tipo_unidad = "kg"
         presentacion = "sacos_cm"
 
-    # Entrada de datos de la obra
+    # Entrada de datos del usuario (metros o litros)
     if presentacion in ["sacos_grout", "sacos_cm"]:
         volumen_litros = st.number_input("Volumen total a rellenar (en Litros):", min_value=1, value=15, step=1)
         material_total = volumen_litros * factor_rendimiento
@@ -174,7 +91,7 @@ with st.sidebar:
         sacos = math.ceil(material_total / 25)
         st.metric("Sacos de 25 kg necesarios:", f"{sacos} Saco(s)")
 
-    st.caption("⚠️ Valores teóricos mínimos de rendimiento. El consumo real variará según la porosidad y rugosidad de la superficie.")
+    st.caption("⚠️ Valores teóricos mínimos de rendimiento. El consumo real variará según la porosidad de la superficie.")
 # =========================================================================
 # CENTRO DE LA PANTALLA: HISTORIAL DEL CHAT CON EL ASESOR
 # =========================================================================
@@ -182,7 +99,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Caja de Aprendizaje en Vivo
+# Caja de Aprendizaje en Vivo (Aparece si falta información)
 if st.session_state.mostrar_formulario:
     st.warning("🎓 Modo Aprendizaje Activo")
     st.info(f"Enséñame cómo responder a: *\"{st.session_state.pregunta_pendiente}\"*")
@@ -196,7 +113,7 @@ if st.session_state.mostrar_formulario:
                 st.session_state.mostrar_formulario = False
                 st.rerun()
 
-# Procesamiento del chat central
+# Procesamiento de la entrada del usuario en el chat central
 if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tienes en obra?"):
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -204,7 +121,7 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
 
     prompt_normalizado = normalizar_texto(prompt)
 
-    # Buscar en memoria manual de lecciones
+    # Buscar primero en la memoria de lecciones manuales
     respuesta_guardada = ""
     for clave_memoria, valor_memoria in st.session_state.cerebro_tienda.items():
         if clave_memoria in prompt_normalizado or prompt_normalizado in clave_memoria:
@@ -235,15 +152,15 @@ REGLA DE ORO DE FORMATO: No utilices bajo ninguna circunstancia notaciones matem
 === BASE DE CONOCIMIENTO DE PRODUCTOS ===
 FESTER ACRIFLEX: Membrana de refuerzo de poliéster tejido. Rollo 1.10m x 100m.
 FESTER ACRITON GREEN-SHIELD 10 AÑOS: Impermeabilizante acrílico ecológico reflectivo (Cool Roof). No inmersión.
-FESTER ACRITON RESANADOR: Resanador acrílico para grietas hasta 5mm estáticas.
+FESTER ACRITON RESANADOR: Resanador acrílico para grietas de hasta 5mm estáticas.
 FESTER ACRITON PROSHIELD MAX: Secado extra rápido (resiste lluvia en 30 min). Losas y láminas.
-FESTER ACRITON SELLADOR: Sellador/primario acrílico. 5 m²/L.
+FESTER ACRITON SELLADOR: Sellador/primario acrílico. Rendimiento: 5 m²/L.
 FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos elastoméricos de secado rápido.
 FESTER CR-65: Cementoso específico para SALITRE en muros de block/tabique (quitar aplanado). No en techos.
 FESTER CR-66 FIBRE FORCE: Cementoso flexible Kit de 35 kg. Muros cimentación = 3.5 kg/m²; Baños/Muros/Tabique = 4 kg/m²; Albercas/Cisternas = 5 kg/m².
-FESTERBOND: Adhesivo acrílico. SÍ se mezcla como fortificador SOLO en mezclas tradicionales de obra (arena, agua, cemento). NUNCA dentro de morteros reparadores CM ni Grouts.
-FESTER VAPORTITE 550: Impermeabilizante asfáltico base solvente para cimentaciones y barreras de vapor.
-FESTER HIDROPRIMER: Primario asfáltico base solvente para sistemas con Vaportite. Rendimiento 5 m²/L.
+FESTERBOND: Adhesivo acrílico. SÍ se mezcla como fortificador SOLO en mezclas tradicionales de obra (arena, agua, cemento). NUNCA dentro de la masa de morteros reparadores CM ni Grouts.
+FESTER VAPORTITE 550: Impermeabilizante asfáltico concentrado para cimentaciones y barreras de vapor.
+FESTER HIDROPRIMER: Primario asfáltico base solvente para sistemas con Vaportite. Rendimiento: 5 m²/L.
 FESTER CM-200 / CM-201 / CM-202: Morteros reparadores listos para concreto. Solo se mezclan con agua.
 
 === DÓNDE COMPRAR / CONTACTO COMERCIAL ===
@@ -257,14 +174,13 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
         try:
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
-                        completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile", # <-- MODELO ESTABLE INTEGRADO
+            completion = client.chat.completions.create(
+                model="llama3-70b-8192",
                 messages=historial_completo,
                 temperature=0.0,
                 max_tokens=1000
             )
-
-            response = completion.choices.message.content
+            response = completion.choices[0].message.content
             
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
