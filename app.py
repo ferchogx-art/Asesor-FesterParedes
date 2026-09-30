@@ -276,12 +276,21 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
             completion = client.chat.completions.create(
-                model="openai/gpt-oss-120b",  # El nuevo modelo de producción oficial en Groq
+                model="openai/gpt-oss-120b",
                 messages=historial_completo,
                 temperature=0.0,
                 max_tokens=1000
             )
-            response = completion.choices.message.content
+            # Extracción segura de la respuesta para el modelo gpt-oss
+            if hasattr(completion, 'choices') and len(completion.choices) > 0:
+                choice = completion.choices[0]
+                if hasattr(choice, 'message'):
+                    response = choice.message.content
+                else:
+                    response = choice['message']['content'] if 'message' in choice else str(choice)
+            else:
+                response = completion['choices'][0]['message']['content']
+
             
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
