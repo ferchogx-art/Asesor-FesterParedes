@@ -257,7 +257,7 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-specdec",
+                 model="llama-3.3-70b-versatile",
                 messages=historial_completo,
                 temperature=0.0,
                 max_tokens=1000
