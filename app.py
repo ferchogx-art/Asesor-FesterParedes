@@ -90,7 +90,6 @@ with st.sidebar:
         
             elif "CR-66" in producto_sel:
         condiciones = ["Muros de cimentación", "Charolas de baño, cocinas o muros de tabique", "Albercas, cisternas, balcones o terrazas"]
-
         unidad_final = "kg"
         # Aplicamos los rendimientos oficiales en kg por m² de la ficha técnica
         if "cimentación" in condicion_sel.lower():
