@@ -192,8 +192,7 @@ with st.sidebar:
         st.metric("Sacos de 25 kg necesarios:", f"{sacos} Saco(s)")
 
     st.caption("⚠️ Valores teóricos mínimos de rendimiento. El consumo real variará según la porosidad de la superficie.")
-
-# =========================================================================
+    # =========================================================================
 # CENTRO DE LA PANTALLA: HISTORIAL DEL CHAT CON EL ASESOR
 # =========================================================================
 for message in st.session_state.messages:
@@ -276,108 +275,7 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
             completion = client.chat.completions.create(
-                model=model_id,
-                messages=historial_completo,
-                temperature=0.0,
-                max_tokens=1000
-            )
-            response = completion.choices.message.content
-            
-            if "3317011786" in response or "no puedo darte una respuesta" in response:
-                st.session_state.pregunta_pendiente = prompt
-                st.session_state.mostrar_formulario = True
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                st.rerun()
-            else:
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-        except Exception as error:
-            st.error(f"Error de conexión con el servidor de IA: {error}")
-            # =========================================================================
-# CENTRO DE LA PANTALLA: HISTORIAL DEL CHAT CON EL ASESOR
-# =========================================================================
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# Caja de Aprendizaje en Vivo (Aparece si falta información)
-if st.session_state.mostrar_formulario:
-    st.warning("🎓 Modo Aprendizaje Activo")
-    st.info(f"Enséñame cómo responder a: *\"{st.session_state.pregunta_pendiente}\"*")
-    with st.form(key="form_leccion_mostrador"):
-        nueva_leccion = st.text_area("Escribe aquí la recomendación o resumen oficial de la tienda:")
-        if st.form_submit_button("Guardar en la memoria de la IA"):
-            if nueva_leccion.strip():
-                clave_busqueda = normalizar_texto(st.session_state.pregunta_pendiente)
-                st.session_state.cerebro_tienda[clave_busqueda] = nueva_leccion.strip()
-                st.success("¡Lección guardada con éxito! Ya me la aprendí de memoria.")
-                st.session_state.mostrar_formulario = False
-                st.rerun()
-
-# Procesamiento de la entrada del usuario en el chat central
-if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tienes en obra?"):
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-    prompt_normalizado = normalizar_texto(prompt)
-
-    # Buscar primero en la memoria de lecciones manuales
-    respuesta_guardada = ""
-    for clave_memoria, valor_memoria in st.session_state.cerebro_tienda.items():
-        if clave_memoria in prompt_normalizado or prompt_normalizado in clave_memoria:
-            respuesta_guardada = valor_memoria
-            break
-
-    if respuesta_guardada:
-        with st.chat_message("assistant"):
-            st.markdown(respuesta_guardada)
-            st.session_state.messages.append({"role": "assistant", "content": respuesta_guardada})
-            st.stop()
-
-    # Intercepción de saludos
-    if prompt_normalizado in ["hola", "buenosdias", "buenasnoches", "buenastardes", "saludos", "quetal", "holis"]:
-        res_saludo = "¡Hola! Soy tu Asesor Técnico FesterParedes, a la orden. ¿En qué problema de obra te puedo ayudar hoy?"
-        with st.chat_message("assistant"):
-            st.markdown(res_saludo)
-            st.session_state.messages.append({"role": "assistant", "content": res_saludo})
-            st.stop()
-
-    mensaje_auxilio = "Con la información que tengo no puedo darte una respuesta 100% precisa sobre esto. Te recomiendo comunicarte directamente con Fester Paredes al 3317011786 para que un especialista te asesore. ¡Con gusto te seguimos ayudando con cualquier otra duda!"
-
-    contexto_sistema = f"""
-Eres 'Fester Paredes', el asesor técnico virtual de Fester. Respondes siempre en español, de forma amable y profesional.
-
-REGLA DE ORO DE FORMATO: No utilices bajo ninguna circunstancia notaciones matemáticas complejas, expresiones LaTeX tipo \\frac o corchetes matemáticos \\[ \\]. Desglosa tus cálculos matemáticos en texto totalmente plano y directo (ejemplo: 50 m2 / 5 m2 por litro = 10 Litros).
-
-=== BASE DE CONOCIMIENTO DE PRODUCTOS ===
-FESTER ACRIFLEX: Membrana de refuerzo de poliéster tejido. Rollo 1.10m x 100m.
-FESTER ACRITON GREEN-SHIELD 10 AÑOS: Impermeabilizante acrílico ecológico reflectivo (Cool Roof). No inmersión.
-FESTER ACRITON RESANADOR: Resanador acrílico para grietas de hasta 5mm estáticas.
-FESTER ACRITON PROSHIELD MAX: Secado extra rápido (resiste lluvia en 30 min). Losas y láminas.
-FESTER ACRITON SELLADOR: Sellador/primario acrílico. Rendimiento: 5 m²/L.
-FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos elastoméricos de secado rápido.
-FESTER CR-65: Cementoso específico para SALITRE en muros de block/tabique (quitar aplanado). No en techos.
-FESTER CR-66 FIBRE FORCE: Cementoso flexible Kit de 35 kg. Muros cimentación = 3.5 kg/m²; Baños/Muros/Tabique = 4 kg/m²; Albercas/Cisternas = 5 kg/m².
-FESTERBOND: Adhesivo acrílico. SÍ se mezcla como fortificador SOLO en mezclas tradicionales de obra (arena, agua, cemento). NUNCA dentro de la masa de morteros reparadores CM ni Grouts.
-FESTER VAPORTITE 550: Impermeabilizante asfáltico concentrado para cimentaciones y barreras de vapor.
-FESTER HIDROPRIMER: Primario asfáltico base solvente para sistemas con Vaportite. Rendimiento: 5 m²/L.
-FESTER CM-200 / CM-201 / CM-202: Morteros reparadores listos para concreto. Solo se mezclan con agua.
-
-=== DÓNDE COMPRAR / CONTACTO COMERCIAL ===
-Nosotros somos distribuidores autorizados Fester y con gusto te vendemos directo por WhatsApp al 3317011786, o en tienda física en Av. Juan Gil Preciado #2001 Int. 8, Plaza Aleira, Zapopan.
-
-=== CUANDO NO TIENES LA RESPUESTA ===
-Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase exacta: {mensaje_auxilio}
-"""
-
-    with st.chat_message("assistant"):
-        try:
-            historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
-
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-specdec",  # <-- MODELO ACTUALIZADO Y MAESTRO DE GROQ
+                model="llama-3.3-70b-specdec",
                 messages=historial_completo,
                 temperature=0.0,
                 max_tokens=1000
