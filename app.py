@@ -32,13 +32,13 @@ def normalizar_texto(texto):
     return re.sub(r'[^a-z0-9ñ]', '', texto.lower().strip())
 
 # =========================================================================
-# 🧮 CALCULADORA OFICIAL EN LA BARRA LATERAL IZQUIERDA
+# 🧮 CALCULADORA OFICIAL EN LA BARRA LATERAL IZQUIERDA (UNIFICADA)
 # =========================================================================
 with st.sidebar:
     st.header("🧮 Calculadora de Materiales")
     st.write("Cálculos exactos basados en fichas técnicas oficiales.")
     
-    # 1. Selector de Producto (Tu lista solicitada)
+    # 1. Selector de Producto
     producto_sel = st.selectbox(
         "Selecciona el Producto:",
         [
@@ -79,7 +79,7 @@ with st.sidebar:
         
     elif "Acriton Sellador" in producto_sel:
         st.info("Rendimiento fijo: 5 m² por litro (1 mano sin diluir)")
-        factor_rendimiento = 0.20 # 1 litro entre 5 m2
+        factor_rendimiento = 0.20
         
     elif "CR-65" in producto_sel:
         cond = st.selectbox("Aplicación:", ["Humedad subsuelo (2 capas)", "Agua de lluvia (2 capas)", "Tanques de agua (3 capas)"])
@@ -88,30 +88,35 @@ with st.sidebar:
         tipo_unidad = "kg"
         presentacion = "sacos"
         
-            elif "CR-66" in producto_sel:
-        condiciones = ["Muros de cimentación", "Charolas de baño, cocinas o muros de tabique", "Albercas, cisternas, balcones o terrazas"]
-        unidad_final = "kg"
-        # Aplicamos los rendimientos oficiales en kg por m² de la ficha técnica
-        if "cimentación" in condicion_sel.lower():
-            factor = 3.5
-        elif "baño" in condicion_sel.lower() or "tabique" in condicion_sel.lower():
-            factor = 4.0
-        else: # Albercas, cisternas, balcones y terrazas
-            factor = 5.0
-            
-        total_material = area * factor
-        # Cada unidad/kit completo (Polvo A + Líquido B) pesa 35 kg en total
-        unidades_completas = int(total_material // 35) + (1 if total_material % 35 > 0 else 0)
-        desglose = f"{unidades_completas} x Kit(s) Completos de 35 kg (Polvos + Líquido)"
-
+    elif "CR-66" in producto_sel:
+        cond = st.selectbox(
+            "Aplicación:", 
+            [
+                "Muros de cimentación (3.5 kg/m²)", 
+                "Charolas de baño y cocinas (4 kg/m²)", 
+                "Muros de tabique, block o yeso (4 kg/m²)", 
+                "Albercas, cisternas y tanques (5 kg/m²)", 
+                "Balcones y terrazas (5 kg/m²)"
+            ]
+        )
+        rend = {
+            "Muros de cimentación (3.5 kg/m²)": 3.5, 
+            "Charolas de baño y cocinas (4 kg/m²)": 4.0, 
+            "Muros de tabique, block o yeso (4 kg/m²)": 4.0, 
+            "Albercas, cisternas y tanques (5 kg/m²)": 5.0, 
+            "Balcones y terrazas (5 kg/m²)": 5.0
+        }
+        factor_rendimiento = rend[cond]
+        tipo_unidad = "kg"
+        presentacion = "kits_cr66"
         
     elif "Festerbond" in producto_sel:
         cond = st.selectbox("Uso como adherente:", ["Superficial puro", "Lechada / Fortificador tradicional"])
-        factor_rendimiento = 0.18 if cond == "Superficial puro" else 0.20 # aprox 5-6 m2 por litro
+        factor_rendimiento = 0.18 if cond == "Superficial puro" else 0.20
         
     elif "Festergrout" in producto_sel:
         st.info("Grout cementoso sin contracción estructural.")
-        factor_rendimiento = 1.92 # ~1.92 kg de polvo por cada litro de volumen a rellenar
+        factor_rendimiento = 1.92
         tipo_unidad = "kg"
         presentacion = "sacos_grout"
         
@@ -121,11 +126,11 @@ with st.sidebar:
         
     elif "Hidroprimer" in producto_sel:
         st.info("Primario asfáltico base solvente.")
-        factor_rendimiento = 0.20 # rendimiento de 5 m2 por litro
+        factor_rendimiento = 0.20
         
     elif "CM-200" in producto_sel or "CM-201" in producto_sel or "CM-202" in producto_sel:
         st.info("Morteros reparadores volumétricos. Se calcula por litros de mezcla requerida.")
-        factor_rendimiento = 1.80 # aprox 1.8 kg por litro de oquedad
+        factor_rendimiento = 1.80
         tipo_unidad = "kg"
         presentacion = "sacos_cm"
 
@@ -134,13 +139,13 @@ with st.sidebar:
         volumen_litros = st.number_input("Volumen total a rellenar (en Litros):", min_value=1, value=15, step=1)
         material_total = volumen_litros * factor_rendimiento
     else:
-        area_m2 = st.number_input("Área total a tratar (m²):", min_value=1, value=50, step=1)
+        area_m2 = st.number_input("Área total a tratar (m²):", min_value=1, value=10, step=1)
         material_total = area_m2 * factor_rendimiento
         
     st.markdown("---")
     st.subheader(f"Total mínimo: {material_total:.2f} {tipo_unidad}")
     
-    # 4. Desglose de empaques comerciales
+    # 4. Desglose de empaques comerciales según el tipo de producto
     if tipo_unidad == "L":
         cubetas = math.floor(material_total / 19)
         resto = material_total % 19
@@ -155,12 +160,16 @@ with st.sidebar:
         sacos = math.ceil(material_total / 25)
         st.metric("Sacos de 25 kg necesarios:", f"{sacos} Saco(s)")
         
+    elif presentacion == "kits_cr66":
+        kits = math.ceil(material_total / 35)
+        st.metric("Kits de 35 kg necesarios (A+B):", f"{kits} Kit(s)")
+        
     elif presentacion == "sacos_grout":
-        sacos = math.ceil(material_total / 30) # Sacos de Festergrout son de 30kg
+        sacos = math.ceil(material_total / 30)
         st.metric("Sacos de 30 kg necesarios:", f"{sacos} Saco(s)")
         
     elif presentacion == "sacos_cm":
-        sacos = math.ceil(material_total / 25) # Sacos de CM son de 25kg
+        sacos = math.ceil(material_total / 25)
         st.metric("Sacos de 25 kg necesarios:", f"{sacos} Saco(s)")
 
     st.caption("⚠️ Valores teóricos mínimos de rendimiento. El consumo real variará según la porosidad y rugosidad de la superficie.")
