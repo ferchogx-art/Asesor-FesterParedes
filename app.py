@@ -275,14 +275,12 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
         try:
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
-                       completion = client.chat.completions.create(
-                model=model_id,  # <-- AHORA SÍ CONECTA CON LA LÍNEA 19 AUTOMÁTICAMENTE
+            completion = client.chat.completions.create(
+                model="openai/gpt-oss-120b",  # El nuevo modelo de producción oficial en Groq
                 messages=historial_completo,
                 temperature=0.0,
                 max_tokens=1000
             )
-
-
             response = completion.choices.message.content
             
             if "3317011786" in response or "no puedo darte una respuesta" in response:
@@ -296,4 +294,3 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
                 st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as error:
             st.error(f"Error de conexión con el servidor de IA: {error}")
-
