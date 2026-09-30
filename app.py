@@ -16,7 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama3-70b-8192"
+model_id = "llama-3.1-70b-versatile"
 
 # 2. Inicializar memorias de conversación
 if "messages" not in st.session_state:
@@ -192,7 +192,7 @@ with st.sidebar:
         st.metric("Sacos de 25 kg necesarios:", f"{sacos} Saco(s)")
 
     st.caption("⚠️ Valores teóricos mínimos de rendimiento. El consumo real variará según la porosidad de la superficie.")
-    # =========================================================================
+# =========================================================================
 # CENTRO DE LA PANTALLA: HISTORIAL DEL CHAT CON EL ASESOR
 # =========================================================================
 for message in st.session_state.messages:
@@ -275,8 +275,9 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-specdec",
+                model="llama-3.3-70b-versatile",  # MODELO ACTIVO EN PRODUCCIÓN SIN BLOQUEOS
                 messages=historial_completo,
+
                 temperature=0.0,
                 max_tokens=1000
             )
@@ -293,5 +294,4 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
                 st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as error:
             st.error(f"Error de conexión con el servidor de IA: {error}")
-
 
