@@ -14,8 +14,13 @@ if not api_key:
     st.error("Falta configurar la clave GROQ_API_KEY en los Secrets de Streamlit.")
     st.stop()
 
-client = Groq(api_key=api_key)
-model_id = "llama-3.3-70b-versatile"
+            completion = client.chat.completions.create(
+                model="llama-3.3-70b-specdec",  # <-- NOMBRE NUEVO ACTUALIZADO
+                messages=historial_completo,
+                temperature=0.0,
+                max_tokens=1000
+            )
+
 
 # 2. Inicializar memorias de conversación
 if "messages" not in st.session_state:
