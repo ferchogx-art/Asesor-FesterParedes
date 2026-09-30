@@ -16,7 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama3-70b-8192"
+model_id = "openai/gpt-oss-120b"
 
 
 # 2. Inicializar memorias de conversación
