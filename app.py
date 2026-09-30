@@ -16,7 +16,8 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama-3.3-70b-specdec"  # <-- Cambiado aquí
+model_id = "llama3-70b-8192"
+
 
 # 2. Inicializar memorias de conversación
 if "messages" not in st.session_state:
@@ -274,12 +275,13 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
         try:
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
-            completion = client.chat.completions.create(
-                model=model_id,  # <-- Ahora usa la variable idéntica de arriba para que nunca se descompense
+                       completion = client.chat.completions.create(
+                model=model_id,  # <-- AHORA SÍ CONECTA CON LA LÍNEA 19 AUTOMÁTICAMENTE
                 messages=historial_completo,
                 temperature=0.0,
                 max_tokens=1000
             )
+
 
             response = completion.choices.message.content
             
