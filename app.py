@@ -88,11 +88,23 @@ with st.sidebar:
         tipo_unidad = "kg"
         presentacion = "sacos"
         
-    elif "CR-66" in producto_sel:
-        cond = st.selectbox("Aplicación:", ["Muros/Baños (2 capas)", "Balcones/Terrazas (2 capas)", "Cisternas/Albercas (3 capas)"])
-        rend = {"Muros/Baños (2 capas)": 2.0, "Balcones/Terrazas (2 capas)": 2.5, "Cisternas/Albercas (3 capas)": 3.0}
-        factor_rendimiento = rend[cond]
-        tipo_unidad = "L" # El sistema viene líquido/pastoso A+B se mide en litros de mezcla
+            elif "CR-66" in producto_sel:
+        condiciones = ["Muros de cimentación", "Charolas de baño, cocinas o muros de tabique", "Albercas, cisternas, balcones o terrazas"]
+
+        unidad_final = "kg"
+        # Aplicamos los rendimientos oficiales en kg por m² de la ficha técnica
+        if "cimentación" in condicion_sel.lower():
+            factor = 3.5
+        elif "baño" in condicion_sel.lower() or "tabique" in condicion_sel.lower():
+            factor = 4.0
+        else: # Albercas, cisternas, balcones y terrazas
+            factor = 5.0
+            
+        total_material = area * factor
+        # Cada unidad/kit completo (Polvo A + Líquido B) pesa 35 kg en total
+        unidades_completas = int(total_material // 35) + (1 if total_material % 35 > 0 else 0)
+        desglose = f"{unidades_completas} x Kit(s) Completos de 35 kg (Polvos + Líquido)"
+
         
     elif "Festerbond" in producto_sel:
         cond = st.selectbox("Uso como adherente:", ["Superficial puro", "Lechada / Fortificador tradicional"])
