@@ -1,9 +1,10 @@
 import os
 import re
+import math
 import streamlit as st
 from groq import Groq
 
-st.set_page_config(page_title="Asesor FesterParedes", page_icon="🏗️", layout="centered")
+st.set_page_config(page_title="Asesor FesterParedes", page_icon="🏗️", layout="wide") # Cambiado a 'wide' para que luzca mejor con barra lateral
 st.title("🏗️ Asesor Técnico FesterParedes IA")
 st.write("Sistema maestro desde cero. ¡Tú eres el profesor de esta IA!")
 
@@ -14,26 +15,148 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
+model_id = "llama-3.3-70b-versatile"
 
-# ID del modelo fijo que estás utilizando actualmente
-model_id = "openai/gpt-oss-120b"
-
-# CORRECCIÓN: Se quitó la coma del final para que sea un String válido
-model_id = "openai/gpt-oss-120b"
-
-
-
-# 2. Inicializar memorias de conversación y lecciones de la tienda
+# 2. Inicializar memorias de conversación
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "cerebro_tienda" not in st.session_state:
-    st.session_state.cerebro_tienda = {}  # Aquí se guardan tus resúmenes en vivo
+    st.session_state.cerebro_tienda = {}  
 if "pregunta_pendiente" not in st.session_state:
     st.session_state.pregunta_pendiente = ""
 if "mostrar_formulario" not in st.session_state:
     st.session_state.mostrar_formulario = False
 
-# Pintar el historial en la pantalla de forma limpia
+# Limpiador de texto para buscar coincidencias exactas en tu memoria
+def normalizar_texto(texto):
+    return re.sub(r'[^a-z0-9ñ]', '', texto.lower().strip())
+
+# =========================================================================
+# 🧮 CALCULADORA OFICIAL EN LA BARRA LATERAL IZQUIERDA
+# =========================================================================
+with st.sidebar:
+    st.header("🧮 Calculadora de Materiales")
+    st.write("Cálculos exactos basados en fichas técnicas oficiales.")
+    
+    # 1. Selector de Producto (Tu lista solicitada)
+    producto_sel = st.selectbox(
+        "Selecciona el Producto:",
+        [
+            "Fester Acriton Green-Shield 10 años",
+            "Fester Acriton Proshield Max",
+            "Fester A (A3 / A5 / A7)",
+            "Fester Acriton Sellador",
+            "Fester CR-65",
+            "Fester CR-66 Fibre Force",
+            "Festerbond",
+            "Festergrout (NM 400 / 600 / 800)",
+            "Fester Vaportite 550",
+            "Fester Hidroprimer",
+            "Fester CM-200",
+            "Fester CM-201",
+            "Fester CM-202"
+        ]
+    )
+    
+    factor_rendimiento = 1.0
+    tipo_unidad = "L"
+    presentacion = "cubetas"
+    
+    # 2. Lógica de Condiciones y Rendimientos Oficiales por Producto
+    if "Green-Shield" in producto_sel:
+        cond = st.selectbox("Condición:", ["Sin malla", "Con malla Revoflex", "Con malla Acriflex"])
+        rend = {"Sin malla": 1.0, "Con malla Revoflex": 1.2, "Con malla Acriflex": 1.5}
+        factor_rendimiento = rend[cond]
+        
+    elif "Proshield Max" in producto_sel:
+        cond = st.selectbox("Condición:", ["Normal o lámina", "Con fisuras sin malla", "Con malla Revoflex", "Con malla Acriflex", "Mantenimiento"])
+        rend = {"Normal o lámina": 1.0, "Con fisuras sin malla": 1.5, "Con malla Revoflex": 1.2, "Con malla Acriflex": 1.5, "Mantenimiento": 0.65}
+        factor_rendimiento = rend[cond]
+        
+    elif "Fester A " in producto_sel:
+        cond = st.selectbox("Condición:", ["Superficie normal", "Con malla de refuerzo"])
+        factor_rendimiento = 1.0 if cond == "Superficie normal" else 1.5
+        
+    elif "Acriton Sellador" in producto_sel:
+        st.info("Rendimiento fijo: 5 m² por litro (1 mano sin diluir)")
+        factor_rendimiento = 0.20 # 1 litro entre 5 m2
+        
+    elif "CR-65" in producto_sel:
+        cond = st.selectbox("Aplicación:", ["Humedad subsuelo (2 capas)", "Agua de lluvia (2 capas)", "Tanques de agua (3 capas)"])
+        rend = {"Humedad subsuelo (2 capas)": 3.0, "Agua de lluvia (2 capas)": 4.0, "Tanques de agua (3 capas)": 5.0}
+        factor_rendimiento = rend[cond]
+        tipo_unidad = "kg"
+        presentacion = "sacos"
+        
+    elif "CR-66" in producto_sel:
+        cond = st.selectbox("Aplicación:", ["Muros/Baños (2 capas)", "Balcones/Terrazas (2 capas)", "Cisternas/Albercas (3 capas)"])
+        rend = {"Muros/Baños (2 capas)": 2.0, "Balcones/Terrazas (2 capas)": 2.5, "Cisternas/Albercas (3 capas)": 3.0}
+        factor_rendimiento = rend[cond]
+        tipo_unidad = "L" # El sistema viene líquido/pastoso A+B se mide en litros de mezcla
+        
+    elif "Festerbond" in producto_sel:
+        cond = st.selectbox("Uso como adherente:", ["Superficial puro", "Lechada / Fortificador tradicional"])
+        factor_rendimiento = 0.18 if cond == "Superficial puro" else 0.20 # aprox 5-6 m2 por litro
+        
+    elif "Festergrout" in producto_sel:
+        st.info("Grout cementoso sin contracción estructural.")
+        factor_rendimiento = 1.92 # ~1.92 kg de polvo por cada litro de volumen a rellenar
+        tipo_unidad = "kg"
+        presentacion = "sacos_grout"
+        
+    elif "Vaportite" in producto_sel:
+        cond = st.selectbox("Aplicación asfáltica:", ["Capa sola en losa (por capa)", "Sistema multicapa con malla (total)"])
+        factor_rendimiento = 1.0 if cond == "Capa sola en losa (por capa)" else 2.0
+        
+    elif "Hidroprimer" in producto_sel:
+        st.info("Primario asfáltico base solvente.")
+        factor_rendimiento = 0.20 # rendimiento de 5 m2 por litro
+        
+    elif "CM-200" in producto_sel or "CM-201" in producto_sel or "CM-202" in producto_sel:
+        st.info("Morteros reparadores volumétricos. Se calcula por litros de mezcla requerida.")
+        factor_rendimiento = 1.80 # aprox 1.8 kg por litro de oquedad
+        tipo_unidad = "kg"
+        presentacion = "sacos_cm"
+
+    # 3. Entrada de datos del cliente
+    if presentacion in ["sacos_grout", "sacos_cm"]:
+        volumen_litros = st.number_input("Volumen total a rellenar (en Litros):", min_value=1, value=15, step=1)
+        material_total = volumen_litros * factor_rendimiento
+    else:
+        area_m2 = st.number_input("Área total a tratar (m²):", min_value=1, value=50, step=1)
+        material_total = area_m2 * factor_rendimiento
+        
+    st.markdown("---")
+    st.subheader(f"Total mínimo: {material_total:.2f} {tipo_unidad}")
+    
+    # 4. Desglose de empaques comerciales
+    if tipo_unidad == "L":
+        cubetas = math.floor(material_total / 19)
+        resto = material_total % 19
+        botes = math.ceil(resto / 4)
+        if botes >= 5:
+            cubetas += 1
+            botes = 0
+        st.metric("Cubetas de 19 L necesarias:", f"{cubetas} Cubeta(s)")
+        st.metric("Botes de 4 L necesarios:", f"{botes} Bote(s)")
+        
+    elif presentacion == "sacos":
+        sacos = math.ceil(material_total / 25)
+        st.metric("Sacos de 25 kg necesarios:", f"{sacos} Saco(s)")
+        
+    elif presentacion == "sacos_grout":
+        sacos = math.ceil(material_total / 30) # Sacos de Festergrout son de 30kg
+        st.metric("Sacos de 30 kg necesarios:", f"{sacos} Saco(s)")
+        
+    elif presentacion == "sacos_cm":
+        sacos = math.ceil(material_total / 25) # Sacos de CM son de 25kg
+        st.metric("Sacos de 25 kg necesarios:", f"{sacos} Saco(s)")
+
+    st.caption("⚠️ Valores teóricos mínimos de rendimiento. El consumo real variará según la porosidad y rugosidad de la superficie.")
+
+# =========================================================================
+# CENTRO DE LA PANTALLA: HISTORIAL DEL CHAT CON EL ASESOR
+# =========================================================================
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
