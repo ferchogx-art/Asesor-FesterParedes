@@ -256,12 +256,13 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
         try:
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
-            completion = client.chat.completions.create(
-                 model="llama-3.3-70b-versatile",
+                        completion = client.chat.completions.create(
+                model="llama-3.3-70b-versatile", # <-- MODELO ESTABLE INTEGRADO
                 messages=historial_completo,
                 temperature=0.0,
                 max_tokens=1000
             )
+
             response = completion.choices.message.content
             
             if "3317011786" in response or "no puedo darte una respuesta" in response:
