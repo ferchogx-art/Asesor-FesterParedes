@@ -16,7 +16,8 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama-3.1-8b-instant"  # Modelo de producción oficial y activo en Groq
+model_id = "llama-3.1-8b-instant"
+  # Modelo de producción oficial y activo en Groq
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
 if "messages" not in st.session_state:
