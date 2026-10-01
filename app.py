@@ -282,15 +282,23 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
                 max_tokens=1000
             )
             
-            # Extracción segura de la respuesta para evitar el error de 'list'
+                       # Extracción definitiva y segura de texto plano
             if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                choice = completion.choices
-                if hasattr(choice, 'message'):
-                    response = choice.message.content
+                # Si choices es una lista, tomamos el primer elemento [0]
+                choice_obj = completion.choices[0]
+                
+                # Intentamos extraer el contenido usando formato de objeto o diccionario
+                if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
+                    response = choice_obj.message.content
+                elif isinstance(choice_obj, dict) and 'message' in choice_obj:
+                    response = choice_obj['message']['content']
+                elif hasattr(choice_obj, '__dict__') and 'message' in choice_obj.__dict__:
+                    response = choice_obj.__dict__['message'].content
                 else:
-                    response = choice['message']['content'] if 'message' in choice else str(choice)
+                    response = str(choice_obj)
             else:
                 response = str(completion)
+
             
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
