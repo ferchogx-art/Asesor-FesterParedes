@@ -262,21 +262,23 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
         try:
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
             
-            # Intento 1: Con el modelo principal de alta capacidad
+                      # Intento 1: Con el modelo principal de alta capacidad
             try:
                 completion = client.chat.completions.create(
-                    model="llama-3.3-70b-specdec",
+                    model=model_id,  # Usa la variable automática sin comillas
                     messages=historial_completo,
                     temperature=0.0,
                     max_tokens=1000
                 )
-            # Intento 2: Si el primero falla por mantenimiento, brinca automáticamente a la variante estable
+            # Intento 2: Si falla o está saturado, usa el modelo de respaldo directo de Groq
             except Exception:
                 completion = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model="llama3-70b-8192",  # Respaldo oficial clásico de Groq
                     messages=historial_completo,
                     temperature=0.0,
                     max_tokens=1000
+                
+
                 )
 
             response = completion.choices[0].message.content
