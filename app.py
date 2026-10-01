@@ -245,7 +245,7 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
 
     mensaje_auxilio = "Con la información que tengo no puedo darte una respuesta 100% precisa sobre esto. Te recomiendo comunicarte directamente con Fester Paredes al 3317011786 para que un especialista te asesore. ¡Con gusto te seguimos ayudando con cualquier otra duda!"
 
-        contexto_sistema = f"""
+    contexto_sistema = f"""
 Eres 'Fester Paredes', el asesor técnico virtual experto de Fester. Respondes en español, con un tono profesional, claro y preventivo.
 
 === REGLAS DE SEGURIDAD INDUSTRIAL (ESTRICTAS) ===
