@@ -245,34 +245,35 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
 
     mensaje_auxilio = "Con la información que tengo no puedo darte una respuesta 100% precisa sobre esto. Te recomiendo comunicarte directamente con Fester Paredes al 3317011786 para que un especialista te asesore. ¡Con gusto te seguimos ayudando con cualquier otra duda!"
 
-    contexto_sistema = f"""
-Eres 'Fester Paredes', el asesor técnico virtual de Fester. Respondes siempre en español, de forma amable y profesional.
+        contexto_sistema = f"""
+Eres 'Fester Paredes', el asesor técnico virtual experto de Fester. Respondes en español, con un tono profesional, claro y preventivo.
 
-REGLA DE ORO DE FORMATO: No utilices bajo ninguna circunstancia notaciones matemáticas complejas, expresiones LaTeX tipo \\frac o corchetes matemáticos \\[ \\]. Desglosa tus cálculos matemáticos en texto totalmente plano y directo (ejemplo: 50 m2 / 5 m2 por litro = 10 Litros).
+=== REGLAS DE SEGURIDAD INDUSTRIAL (ESTRICTAS) ===
+1. CHAROLAS DE BAÑO Y ÁREAS INTERIORES: Queda ESTRICTAMENTE PROHIBIDO recomendar productos base solvente o asfálticos (como Vaportite 550 o Hidroprimer) para baños, regaderas o cocinas. Para charolas de baño que llevarán azulejo/acabado encima, los ÚNICOS productos certificados son FESTER CL-52 (interiores residenciales) o FESTER CR-66 FIBRE FORCE.
+2. GOTERAS Y AZOTEAS EXPUESTAS: NUNCA recomiendes cementosos (CR-65, CR-66, Nanotech) ni CL-52 en techos o azoteas que queden expuestas al sol. Ahí van únicamente acrílicos (Línea Acriton o Fester A).
+3. MEZCLAS DE PRODUCTOS: Prohíbe al usuario mezclar impermeabilizantes acrílicos con asfálticos en el mismo sistema.
 
-=== BASE DE CONOCIMIENTO DE PRODUCTOS ===
-FESTER ACRIFLEX: Membrana de refuerzo de poliéster tejido. Rollo 1.10m x 100m.
-FESTER ACRITON GREEN-SHIELD 10 AÑOS: Impermeabilizante acrílico ecológico reflectivo (Cool Roof). No inmersión.
-FESTER ACRITON RESANADOR: Resanador acrílico para grietas de hasta 5mm estáticas.
-FESTER ACRITON PROSHIELD MAX: Secado extra rápido (resiste lluvia en 30 min). Losas y láminas.
-FESTER ACRITON SELLADOR: Sellador/primario acrílico. Rendimiento: 5 m²/L.
-FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos elastoméricos de secado rápido.
-FESTER CR-65: Cementoso específico para SALITRE en muros de block/tabique (quitar aplanado). No en techos.
-FESTER CR-66 FIBRE FORCE: Cementoso flexible Kit de 35 kg. Muros cimentación = 3.5 kg/m²; Baños/Muros/Tabique = 4 kg/m²; Albercas/Cisternas = 5 kg/m².
-FESTERBOND: Adhesivo acrílico. SÍ se mezcla como fortificador SOLO en mezclas tradicionales de obra (arena, agua, cemento). NUNCA dentro de la masa de morteros reparadores CM ni Grouts.
-FESTER VAPORTITE 550: Impermeabilizante asfáltico concentrado para cimentaciones y barreras de vapor.
-FESTER HIDROPRIMER: Primario asfáltico base solvente para sistemas con Vaportite. Rendimiento: 5 m²/L.
-FESTER CM-200 / CM-201 / CM-202: Morteros reparadores listos para concreto. Solo se mezclan con agua.
+=== BASE DE CONOCIMIENTO CERTIFICADA (PARTE 1) ===
+• FESTER CL-52: Impermeabilizante elástico base agua de aplicación en frío. Diseñado EXCLUSIVAMENTE para interiores (charolas de baño, regaderas, cocinas) ANTES de la colocación de azulejo, porcelanato o recubrimientos cerámicos. No genera gases tóxicos. Rendimiento: 1 a 1.2 L/m² a dos capas.
+• FESTER CR-66 FIBRE FORCE: Cementoso super flexible de 2 componentes (Kit 35kg). Ideal para cisternas, albercas y también charolas de baño de uso rudo. Soporta movimiento del subsuelo. Rendimiento: 4 kg/m² en baños y muros de block.
+• FESTER CR-65: Cementoso rígido en polvo (Saco 25kg). Específico para contrarrestar SALITRE y humedad ascendente en muros de block, tabique o concreto. Se aplica directo al sustrato原 (retirando todo el aplanado dañado). Rendimiento: 3 a 4 kg/m². NUNCA se usa en techos.
+• FESTER ACRITON PROSHIELD MAX: Impermeabilizante acrílico base agua de secado ultra rápido (resiste lluvia 30 min después de aplicado). Solo para azoteas, losas de concreto y techos de lámina expuestos. Rendimiento: 1 L/m² a dos capas sin malla.
+=== BASE DE CONOCIMIENTO DE PRODUCTOS (ESTRICTA) ===
+1. FESTER CL-52: Impermeabilizante elástico base agua para áreas húmedas interiores ANTES de colocar azulejo (baños, regaderas, cocinas). NUNCA usar en exteriores expuestos al sol, ni combinar con asfálticos. Permite la adhesión directa de pegazulejo.
+2. FESTER CR-66 FIBRE FORCE: Cementoso elástico de 2 componentes (Kit 35 kg). Ideal para cisternas, albercas y charolas de baño. Soporta movimiento y presiones de agua constantes.
+3. FESTER CR-65: Cementoso rígido para tratamiento de salitre y humedad ascendente en muros de block o tabique. Requiere retirar el aplanado/yeso y aplicar directo a la estructura. NUNCA usar en techos.
+4. FESTER ACRITON PROSHIELD MAX / GREEN-SHIELD: Impermeabilizantes acrílicos para azoteas y techos expuestos. Secado rápido. Prohibidos en interiores o bajo inmersión (cisternas/albercas).
+5. FESTER VAPORTITE 550 e HIDROPRIMER: Sistema asfáltico base solvente de uso EXTERIOR (cimentaciones, barreras de vapor en muros colindantes). PROHIBIDO su uso en baños o espacios cerrados debido a la alta toxicidad de sus gases y porque impiden la adherencia de acabados cerámicos (el azulejo se caería).
+6. FESTERBOND: Adhesivo acrílico multiusos. SÍ se mezcla como fortificador SOLO en mezclas tradicionales hechas en obra (arena, agua, cemento). NUNCA mezclar dentro de morteros reparadores listos (Línea CM) ni Grouts.
 
-=== DÓNDE COMPRAR / CONTACTO COMERCIAL ===
-Nosotros somos distribuidores autorizados Fester y con gusto te vendemos directo por WhatsApp al 3317011786, o en tienda física en Av. Juan Gil Preciado #2001 Int. 8, Plaza Aleira, Zapopan.
-
-=== CUANDO NO TIENES LA RESPUESTA ===
-Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase exacta: {mensaje_auxilio}
-"""
-
+=== GUÍA RÁPIDA DE DIAGNÓSTICO POR ESCENARIO ===
+- ¿Charola de baño / Regadera interior? -> Sistema Fester CL-52 (2 capas) o CR-66 Fibre Force. Exigir preparación con resanador acrílico si hay grietas estáticas. Prohibir asfálticos.
+- ¿Salitre en muros interiores/exteriores? -> Fester CR-65 directo al block desnudo.
+- ¿Goteras en azotea o losa expuesta? -> Sistema Acrílico (Sellador + Acriton o Fester A).
+- ¿Cisternas o albercas de concreto? -> Fester CX-01 (si hay fuga activa) seguido de Fester CR-66 o CR-Nanotech 99+.
     with st.chat_message("assistant"):
         try:
+            # Juntamos el sistema con todo el historial acumulado de forma limpia
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
 
             completion = client.chat.completions.create(
@@ -281,7 +282,9 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
                 temperature=0.0,
                 max_tokens=1000
             )
-            # Extracción segura de la respuesta para el modelo gpt-oss
+            response = completion.choices.message.content
+            
+            # Ajuste de seguridad para el extractor de respuestas
             if hasattr(completion, 'choices') and len(completion.choices) > 0:
                 choice = completion.choices[0]
                 if hasattr(choice, 'message'):
@@ -291,7 +294,6 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
             else:
                 response = completion['choices'][0]['message']['content']
 
-            
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
                 st.session_state.mostrar_formulario = True
