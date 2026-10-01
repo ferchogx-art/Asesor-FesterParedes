@@ -16,7 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
- model_id = "llama-3.1-70b-versatile"
+ model_id = "llama-3.1-70b-versatile",
 
 
 # 2. Inicializar memorias de conversación
