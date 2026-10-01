@@ -16,9 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama-3.3-70b-versatile"
-
-  # Modelo de producción oficial y activo en Groq
+model_id = "openai/gpt-oss-20b"  # El modelo de producción oficial activo en Groq para chat rápido
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
 if "messages" not in st.session_state:
@@ -264,22 +262,15 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
         try:
             historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
             
-                       # Intento 1: Con el modelo principal de alta capacidad (Llama 3.3 70B)
-            try:
-                completion = client.chat.completions.create(
-                    model=model_id,
-                    messages=historial_completo,
-                    temperature=0.0,
-                    max_tokens=1000
-                )
-            # Intento 2: Si el servidor principal se satura, brinca al modelo ligero de producción
-            except Exception:
-                completion = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
-                    messages=historial_completo,
-                    temperature=0.0,
-                    max_tokens=1000
-                )
+                       # Conexión directa y segura usando el modelo activo en la línea 19
+            completion = client.chat.completions.create(
+                model=model_id,  # Usa la variable automática sin nombres escritos a mano
+                messages=historial_completo,
+                temperature=0.0,
+                max_tokens=1000
+            )
+            response = completion.choices.message.content
+
 
             response = completion.choices[0].message.content
             
