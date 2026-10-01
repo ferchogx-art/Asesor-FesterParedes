@@ -269,7 +269,16 @@ Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase
                 temperature=0.0,
                 max_tokens=1000
             )
-            response = completion.choices.message.content
+                        # Extracción segura de la respuesta para evitar el error de 'list'
+            if hasattr(completion, 'choices') and len(completion.choices) > 0:
+                choice = completion.choices[0]
+                if hasattr(choice, 'message'):
+                    response = choice.message.content
+                else:
+                    response = choice['message']['content'] if 'message' in choice else str(choice)
+            else:
+                response = str(completion)
+
 
 
             response = completion.choices[0].message.content
