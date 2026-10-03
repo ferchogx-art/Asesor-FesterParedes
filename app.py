@@ -276,12 +276,15 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
                 st.session_state.messages[-6:]
             )
 
-            # MODELO OFICIAL DE PRODUCCIÓN EN GROQ: Llama 3.3 70B SpecDec
+            
+
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-specdec",  # Reemplazo garantizado y activo en la API
-                messages=historial_optimizado,
+                model=model_id,  # Al dejarlo así, tomará automáticamente el de la línea 19
+                messages=historial_completo,
                 temperature=0.0,
-                max_tokens=800
+                max_tokens=1000
+
+
             )
             
             # Extracción segura de la respuesta de texto plano
