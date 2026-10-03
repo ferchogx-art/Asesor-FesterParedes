@@ -16,7 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama-3.3-70b-versatile"
+model_id = "llama-3.3-70b-specdec"
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
 if "messages" not in st.session_state:
@@ -270,20 +270,20 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
 
     with st.chat_message("assistant"):
         try:
-            # 1. Creamos la variable optimizada con los últimos 6 mensajes del chat
+            # Creamos el historial recortado para proteger tus tokens
             historial_optimizado = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages[-6:]
 
-            # 2. Llamamos a la API usando la variable del modelo unificada
+            # Llamada oficial usando la variable unificada de la línea 19
             completion = client.chat.completions.create(
-                model=model_id,               # Lee automáticamente el modelo vigente de la línea 19
-                messages=historial_optimizado, # Control estricto de tokens de entrada
+                model=model_id,
+                messages=historial_optimizado,
                 temperature=0.0,
                 max_tokens=800
             )
             
-            # 3. Extracción definitiva y segura de texto plano
+            # Extracción segura de la respuesta de texto plano
             if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                choice_obj = completion.choices[0] # Se asegura el acceso al índice 0 del objeto de Groq
+                choice_obj = completion.choices[0]
                 
                 if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
                     response = choice_obj.message.content
@@ -296,7 +296,7 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
             else:
                 response = str(completion)
 
-            # 4. Lógica de redirección a WhatsApp / Modo Aprendizaje
+            # Sistema de control de mostrador / contacto comercial
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
                 st.session_state.mostrar_formulario = True
@@ -309,3 +309,4 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
                 
         except Exception as error:
             st.error(f"Error de conexión con el servidor de IA: {error}")
+
