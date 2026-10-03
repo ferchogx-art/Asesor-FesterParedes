@@ -270,20 +270,20 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
 
     with st.chat_message("assistant"):
         try:
-            # Creamos el historial recortado para proteger tus tokens
+            # 1. Creamos la variable optimizada con los últimos 6 mensajes del chat
             historial_optimizado = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages[-6:]
 
-            # Llamada oficial con el modelo correcto y la variable correcta
+            # 2. Llamamos a la API usando la variable del modelo unificada
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-specdec",
-                messages=historial_optimizado,
+                model=model_id,               # Lee automáticamente el modelo vigente de la línea 19
+                messages=historial_optimizado, # Control estricto de tokens de entrada
                 temperature=0.0,
                 max_tokens=800
             )
             
-            # Extracción segura de la respuesta de texto plano
+            # 3. Extracción definitiva y segura de texto plano
             if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                choice_obj = completion.choices[0]
+                choice_obj = completion.choices[0] # Se asegura el acceso al índice 0 del objeto de Groq
                 
                 if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
                     response = choice_obj.message.content
@@ -296,7 +296,7 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
             else:
                 response = str(completion)
 
-            # Sistema de control de mostrador / contacto comercial
+            # 4. Lógica de redirección a WhatsApp / Modo Aprendizaje
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
                 st.session_state.mostrar_formulario = True
