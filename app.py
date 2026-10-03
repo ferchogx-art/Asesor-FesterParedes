@@ -254,33 +254,44 @@ Fester Paredes es distribuidor autorizado.
 • Tienda: Av. Juan Gil Preciado #2001 Int. 8, Plaza Aleira, Zapopan.
 • Redes sociales: @festerparedes.
 Siempre que remitas a contacto usa exactamente la frase: 'te recomiendo comunicarte directamente con Fester Paredes al 3317011786'.
-    """with st.chat_message("assistant"):
-try:
-# Estructura e historial de tu código original intactos
-historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messagescompletion = client.chat.completions.create(
-model=model_id, # Conserva tu modelo gpt-oss-20b original
-messages=historial_completo,
-temperature=0.0,
-max_tokens=1000
-)# Extracción segura de la respuesta de tu código original
-if hasattr(completion, 'choices') and len(completion.choices) > 0:
-choice_obj = completion.choices[0]if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
-response = choice_obj.message.content
-elif isinstance(choice_obj, dict) and 'message' in choice_obj:
-response = choice_obj['message']['content']
-elif hasattr(choice_obj, 'dict') and 'message' in choice_obj.dict:
-response = choice_obj.dict['message'].content
-else:
-response = str(choice_obj)
-else:
-response = str(completion)if "3317011786" in response or "no puedo darte una respuesta" in response:
-st.session_state.pregunta_pendiente = prompt
-st.session_state.mostrar_formulario = True
-st.markdown(response)
-st.session_state.messages.append({"role": "assistant", "content": response})
-st.rerun()
-else:
-st.markdown(response)
-st.session_state.messages.append({"role": "assistant", "content": response})
-except Exception as error:
-st.error(f"Error de conexión con el servidor de IA: {error}")
+    
+    with st.chat_message("assistant"):
+        try:
+            historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
+
+            completion = client.chat.completions.create(
+                model=model_id,
+                messages=historial_completo,
+                temperature=0.0,
+                max_tokens=1000
+            )
+            
+                       # Extracción definitiva y segura de texto plano
+            if hasattr(completion, 'choices') and len(completion.choices) > 0:
+                # Si choices es una lista, tomamos el primer elemento [0]
+                choice_obj = completion.choices[0]
+                
+                # Intentamos extraer el contenido usando formato de objeto o diccionario
+                if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
+                    response = choice_obj.message.content
+                elif isinstance(choice_obj, dict) and 'message' in choice_obj:
+                    response = choice_obj['message']['content']
+                elif hasattr(choice_obj, '__dict__') and 'message' in choice_obj.__dict__:
+                    response = choice_obj.__dict__['message'].content
+                else:
+                    response = str(choice_obj)
+            else:
+                response = str(completion)
+
+            
+            if "3317011786" in response or "no puedo darte una respuesta" in response:
+                st.session_state.pregunta_pendiente = prompt
+                st.session_state.mostrar_formulario = True
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.rerun()
+            else:
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+        except Exception as error:
+            st.error(f"Error de conexión con el servidor de IA: {error}")
