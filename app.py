@@ -254,7 +254,7 @@ Fester Paredes es distribuidor autorizado.
 • Tienda: Av. Juan Gil Preciado #2001 Int. 8, Plaza Aleira, Zapopan.
 • Redes sociales: @festerparedes.
 Siempre que remitas a contacto usa exactamente la frase: 'te recomiendo comunicarte directamente con Fester Paredes al 3317011786'.
-"""with st.chat_message("assistant"):
+    """with st.chat_message("assistant"):
 try:
 # Estructura e historial de tu código original intactos
 historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messagescompletion = client.chat.completions.create(
