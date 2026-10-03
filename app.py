@@ -6,6 +6,8 @@ from groq import Groq
 
 # Configuración inicial de la página en formato ancho
 st.set_page_config(page_title="Asesor FesterParedes", page_icon="🏗️", layout="wide")
+# CAMBIO: Aquí agregas el logotipo desde internet
+st.image("https://scontent.cdninstagram.com/v/t51.82787-19/656573311_18072373466254338_4623526891645173879_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=109&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=qxtIv7nTJSIQ7kNvwGqkzxh&_nc_oc=AdrkOWyxDtDagChViMA6oq3Wu8g8zXLGdHKnW0mGYX-AL2451G9iTbJH2XkSinB47xvn4RaKE7nkuc8XBjTdpXdC&_nc_zt=24&_nc_ht=scontent.cdninstagram.com&_nc_gid=uMxwOa2u5xdtYS-22biB1w&_nc_ss=73689&oh=00_AQOhURZgR47nM9FACJNoQ-BqCbtPqQA-DS8PrPVDeOJOIQ&oe=6AC75F61", width=250)
 st.title("🏗️ Asesor Técnico FesterParedes IA")
 st.write("Sistema maestro unificado. ¡Base de datos y calculadora en un solo lugar!")
 
