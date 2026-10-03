@@ -268,38 +268,35 @@ Fester Paredes es distribuidor autorizado. Opciones de venta:
 Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con Fester Paredes al 3317011786'.
 """
 
-    with st.chat_message("assistant"):
+        with st.chat_message("assistant"):
         try:
-            # Enviamos el contexto del sistema + SOLO los últimos 6 mensajes del chat
-            historial_optimizado = (
-                [{"role": "system", "content": contexto_sistema}] + 
-                st.session_state.messages[-6:]
-            )
+            # Creamos el historial recortado para proteger tus tokens
+            historial_optimizado = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages[-6:]
 
-            
-
+            # Llamada oficial con el modelo correcto y la variable correcta
             completion = client.chat.completions.create(
-                model=model_id,  # Al dejarlo así, tomará automáticamente el de la línea 19
-                messages=historial_completo,
+                model="llama-3.3-70b-specdec",
+                messages=historial_optimizado,
                 temperature=0.0,
-                max_tokens=1000
-
-
+                max_tokens=800
             )
             
             # Extracción segura de la respuesta de texto plano
             if hasattr(completion, 'choices') and len(completion.choices) > 0:
                 choice_obj = completion.choices[0]
+                
                 if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
                     response = choice_obj.message.content
                 elif isinstance(choice_obj, dict) and 'message' in choice_obj:
                     response = choice_obj['message']['content']
+                elif hasattr(choice_obj, '__dict__') and 'message' in choice_obj.__dict__:
+                    response = choice_obj.__dict__['message'].content
                 else:
                     response = str(choice_obj)
             else:
                 response = str(completion)
 
-            # Lógica de detección de auxilio o aprendizaje en mostrador
+            # Sistema de control de mostrador / contacto comercial
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
                 st.session_state.mostrar_formulario = True
