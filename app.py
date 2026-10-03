@@ -268,7 +268,7 @@ Fester Paredes es distribuidor autorizado. Opciones de venta:
 Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con Fester Paredes al 3317011786'.
 """
 
-      with st.chat_message("assistant"):
+    with st.chat_message("assistant"):
         try:
             # Enviamos el contexto del sistema + SOLO los últimos 6 mensajes del chat
             historial_optimizado = (
