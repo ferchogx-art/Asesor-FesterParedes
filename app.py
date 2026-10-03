@@ -16,7 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "openai/gpt-oss-20b"  # El modelo de producción oficial activo en Groq para chat rápido
+model_id = "openai/gpt-oss-20b"  # El modelo de tu código original (Activo en Groq)
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
 if "messages" not in st.session_state:
@@ -39,7 +39,6 @@ with st.sidebar:
     st.header("🧮 Calculadora de Materiales")
     st.write("Cálculos exactos basados en fichas técnicas oficiales.")
     
-    # Selector de Producto
     producto_sel = st.selectbox(
         "Selecciona el Producto:",
         [
@@ -63,7 +62,6 @@ with st.sidebar:
     tipo_unidad = "L"
     presentacion = "cubetas"
     
-    # Lógica de Condiciones y Rendimientos Oficiales por Producto
     if "Green-Shield" in producto_sel:
         cond = st.selectbox("Condición:", ["Sin malla", "Con malla Revoflex", "Con malla Acriflex"])
         rend = {"Sin malla": 1.0, "Con malla Revoflex": 1.2, "Con malla Acriflex": 1.5}
@@ -135,7 +133,6 @@ with st.sidebar:
         tipo_unidad = "kg"
         presentacion = "sacos_cm"
 
-    # Entrada de datos del usuario
     if presentacion in ["sacos_grout", "sacos_cm"]:
         volumen_litros = st.number_input("Volumen total a rellenar (en Litros):", min_value=1, value=15, step=1)
         material_total = volumen_litros * factor_rendimiento
@@ -146,7 +143,6 @@ with st.sidebar:
     st.markdown("---")
     st.subheader(f"Total mínimo: {material_total:.2f} {tipo_unidad}")
     
-    # Desglose de empaques comerciales
     if tipo_unidad == "L":
         cubetas = math.floor(material_total / 19)
         resto = material_total % 19
@@ -182,7 +178,6 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Caja de Aprendizaje en Vivo (Aparece si falta información)
 if st.session_state.mostrar_formulario:
     st.warning("🎓 Modo Aprendizaje Activo")
     st.info(f"Enséñame cómo responder a: *\"{st.session_state.pregunta_pendiente}\"*")
@@ -204,7 +199,6 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
 
     prompt_normalizado = normalizar_texto(prompt)
 
-    # Buscar primero en la memoria de lecciones manuales
     respuesta_guardada = ""
     for clave_memoria, valor_memoria in st.session_state.cerebro_tienda.items():
         if clave_memoria in prompt_normalizado or prompt_normalizado in clave_memoria:
@@ -217,7 +211,6 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
             st.session_state.messages.append({"role": "assistant", "content": respuesta_guardada})
             st.stop()
 
-    # Intercepción de saludos
     if prompt_normalizado in ["hola", "buenosdias", "buenasnoches", "buenastardes", "saludos", "quetal", "holis"]:
         res_saludo = "¡Hola! Soy tu Asesor Técnico FesterParedes, a la orden. ¿En qué problema de obra te puedo ayudar hoy?"
         with st.chat_message("assistant"):
@@ -227,84 +220,67 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
 
     mensaje_auxilio = "Con la información que tengo no puedo darte una respuesta 100% precisa sobre esto. Te recomiendo comunicarte directamente con Fester Paredes al 3317011786 para que un especialista te asesore. ¡Con gusto te seguimos ayudando con cualquier otra duda!"
 
-    contexto_sistema = f"""
-Eres 'Fester Paredes', asesor técnico experto en impermeabilización en Zapopan, Jalisco. Respondes en español, amable y profesional.
-REGLA: Recomienda basándote SOLO en la base de conocimientos. Si no sabes, di exactamente: '{mensaje_auxilio}'.
-PROTOCOLO: Antes de recomendar un producto, si el usuario es vago, pide detalles: Ubicación, Tipo de superficie (concreto, lámina), Humedad (salitre, gotera, filtración franca), si hay grietas o tránsito.
-
-PRODUCTOS Y RENDIMIENTOS:
-1. ACRIFLEX: Malla refuerzo integral/puntos críticos (losas, cisternas, esquinas). Rollo 1.10x100m (~100m²).
-2. ACRITON GREEN-SHIELD 10 AÑOS: Acrílico ecológico reflectivo para techos/láminas. Requiere Acriton Sellador previo. No inmersión ni tráfico vehicular.
-3. ACRITON RESANADOR: Para fisuras de hasta 5mm en concreto. Aplicar antes del impermeable.
-4. ACRITON PROSHIELD MAX (4,6,8 años): Acrílico secado rápido (2 capas en una mañana). Losas/láminas.
-5. ACRITON SELLADOR: Primario acrílico. Rendimiento: 5 m²/L directo en techos; diluido 1:1 en muros.
-6. FESTER A (A3,A5,A5 Fibratado,A7): Acrílicos de 3, 5 o 7 años. A5 Fibratado rellena fisuras pequeñas.
-7. CF-890: Anclaje químico poliéster en cartucho (300mL) para varillas/pernos. Catalizado rápido. Superficie seca.
-8. CF-1000: Anclaje químico epóxico estructural de alto desempeño (585mL). Funciona en concreto húmedo.
-9. CL-52: Impermeabilizante interno para BAÑOS, cocinas, saunas, antes de pegar azulejo. No usar en techos expuestos. Rendimiento: 1 L/m² a 2 capas.
-10. CM-200: Mortero reparador no estructural (0.5 a 10cm). Saco 25kg + 4L agua = 14L mezcla. Resiste inmersión.
-11. CM-201: Mortero estructural/no estructural de ALTA resistencia. Fraguado rápido (1 hora). Saco 25kg = 14L mezcla.
-12. CM-202: Mortero FLUIDO estructural para encofrados/cimbras angostas. Fraguado en 1 hora. Saco 25kg = 14L mezcla.
-13. CR-65: Cementoso para SALITRE y humedad ascendente en muros interiores/cimentaciones. Permite transpirar. No usar en techos. Rendimiento: subsuelo 3kg/m², lluvia 4kg/m², tanques 5kg/m² (a 2-3 capas). Saco 25kg.
-14. CR-66 FIBRE FORCE: Cementoso flexible 2 componentes (A+B) para cisternas, albercas, baños o terrazas con piso encima. Puentea grietas 4mm. Rendimiento: cimentación/baños 2kg/m², albercas 3kg/m². Kit de 35kg.
-15. CR-NANOTECH 99+: Polvo para concreto existente bajo presiones hidrostáticas severas (cisternas, albercas). No techos. Rendimiento: 1.5 kg/m² total (2 capas). Saco 24kg.
-16. CR-NANOTECH ADMIX: Aditivo en polvo para mezclar durante la fabricación del concreto nuevo. Dosificación: 2% sobre el peso del cemento (1kg por bulto de 50kg).
-17. CX-01: Mortero fraguado instantáneo (1 min) para taponar fugas y chorros de agua activos bajo presión.
+# TUS INSTRUCCIONES Y FICHAS TÉCNICAS RESUMIDAS (Evita el rebase de tokens)
+contexto_sistema = f"""
+Eres 'Fester Paredes', asesor técnico de Fester en Zapopan, Jalisco. Respondes en español con un tono amable y profesional.
+REGLA: Usa solo esta información. Si no sabes la respuesta o hay ambigüedad, di textualmente: '{mensaje_auxilio}'.
+PROTOCOLO: Antes de recomendar, haz preguntas de sondeo: ubicación (azotea, cimentación, baño), tipo de superficie, tipo de humedad, paso de agua activo y dimensiones.
+FICHAS TÉCNICAS RESUMIDAS:
+1. ACRIFLEX: Malla de poliéster para puntos críticos o refuerzo integral acrílico/asfáltico. Rollo 1.10x100m.
+2. ACRITON GREEN-SHIELD 10 AÑOS: Acrílico ecológico reflectivo para techos. Requiere Acriton Sellador. No tráfico vehicular ni inmersión.
+3. ACRITON RESANADOR: Resanador acrílico para fisuras de hasta 5mm en concreto.
+4. ACRITON PROSHIELD MAX (4, 6 y 8 años): Acrílico elastomérico secado rápido (2 capas en una mañana).
+5. ACRITON SELLADOR: Primario acrílico. Rendimiento: 5 m²/L en techos; diluido 1:1 en muros.
+6. FESTER A (A3, A5, A5 Fibratado, A7): Acrílicos de secado rápido. A5 Fibratado rellena fisuras pequeñas.
+7. CF-890: Anclaje químico poliéster (300mL) para varillas/pernos en seco. Catalizado extra rápido.
+8. CF-1000: Anclaje químico epóxico estructural (585mL). Alta adherencia, funciona en concreto húmedo.
+9. CL-52: Impermeabilizante interno para BAÑOS, cocinas y saunas antes de colocar azulejo. No losas expuestas. Rendimiento: 1 L/m² a 2 capas.
+10. CM-200: Mortero reparador cosmético no estructural (0.5 a 10cm). Resiste inmersión. Saco 25kg = 14L mezcla.
+11. CM-201: Mortero estructural/no estructural de ALTA resistencia. Transitable en 1 hora. Saco 25kg = 14L mezcla.
+12. CM-202: Mortero FLUIDO estructural para colar en cimbras angostas. Transitable en 1 hora. Saco 25kg = 14L mezcla.
+13. CR-65: Cementoso para SALITRE y humedad ascendente en muros y cimentaciones. Permite transpirar. Rendimiento: subsuelo 3kg/m², lluvia 4kg/m², tanques 5kg/m² (a 2-3 capas).
+14. CR-66 FIBRE FORCE: Cementoso flexible de 2 componentes (A+B) para albercas, cisternas, baños o terrazas con piso encima. Kit de 35kg.
+15. CR-NANOTECH 99+: Polvo para concreto existente bajo presiones hidrostáticas severas. Rinde 1.5 kg/m² total (2 capas). Saco 24kg.
+16. CR-NANOTECH ADMIX: Aditivo en polvo para impermeabilizar concreto desde la mezcla. Dosificación: 2% sobre el peso del cemento.
+17. CX-01: Mortero fraguado instantáneo (1 min) para taponar fugas de agua y chorros activos bajo presión.
 18. EPOXINE 200: Adhesivo epóxico estructural para unir concreto nuevo a viejo. Rendimiento: 3 a 3.5 m²/L.
 19. EPOXINE 800 GROUT: Mortero epóxico industrial de 3 componentes para anclaje de maquinaria pesada (>100L).
-20. FESTERBOND: Adhesivo acrílico multiusos. Fortificador de morteros, adherente viejo-nuevo y sellador poroso.
-21. FESTERFLEX: Malla no tejida de refuerzo para sistemas asfálticos en frío.
+20. FESTERBOND: Adhesivo acrílico fortificador de morteros, unión viejo-nuevo y sellador poroso.
+21. FESTERFLEX: Malla no tejida para refuerzo de sistemas asfálticos en frío.
 22. FESTEGRAL: Aditivo integral en polvo para reducir permeabilidad en concretos.
-
-COMPRAS Y TIENDA FÍSICA:
-Fester Paredes es distribuidor autorizado. Opciones de venta:
-- Directo por WhatsApp al 3317011786.
-- Tienda física: Av. Juan Gil Preciado #2001 Int. 8, Plaza Aleira, Zapopan.
-- Redes: @festerparedes en Facebook/Instagram.
-Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con Fester Paredes al 3317011786'.
-"""
-
-=== CUANDO NO TIENES LA RESPUESTA ===
-Si no conoces la respuesta o no está aquí, responde ÚNICAMENTE con esta frase exacta: {mensaje_auxilio}
-"""
-
-    with st.chat_message("assistant"):
-        try:
-            historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messages
-
-            completion = client.chat.completions.create(
-                model=model_id,
-                messages=historial_completo,
-                temperature=0.0,
-                max_tokens=1000
-            )
-            
-                       # Extracción definitiva y segura de texto plano
-            if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                # Si choices es una lista, tomamos el primer elemento [0]
-                choice_obj = completion.choices[0]
-                
-                # Intentamos extraer el contenido usando formato de objeto o diccionario
-                if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
-                    response = choice_obj.message.content
-                elif isinstance(choice_obj, dict) and 'message' in choice_obj:
-                    response = choice_obj['message']['content']
-                elif hasattr(choice_obj, '__dict__') and 'message' in choice_obj.__dict__:
-                    response = choice_obj.__dict__['message'].content
-                else:
-                    response = str(choice_obj)
-            else:
-                response = str(completion)
-
-            
-            if "3317011786" in response or "no puedo darte una respuesta" in response:
-                st.session_state.pregunta_pendiente = prompt
-                st.session_state.mostrar_formulario = True
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                st.rerun()
-            else:
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-        except Exception as error:
-            st.error(f"Error de conexión con el servidor de IA: {error}")
+CONTACTO Y VENTAS:
+Fester Paredes es distribuidor autorizado.
+• WhatsApp: 3317011786.
+• Tienda: Av. Juan Gil Preciado #2001 Int. 8, Plaza Aleira, Zapopan.
+• Redes sociales: @festerparedes.
+Siempre que remitas a contacto usa exactamente la frase: 'te recomiendo comunicarte directamente con Fester Paredes al 3317011786'.
+"""with st.chat_message("assistant"):
+try:
+# Estructura e historial de tu código original intactos
+historial_completo = [{"role": "system", "content": contexto_sistema}] + st.session_state.messagescompletion = client.chat.completions.create(
+model=model_id, # Conserva tu modelo gpt-oss-20b original
+messages=historial_completo,
+temperature=0.0,
+max_tokens=1000
+)# Extracción segura de la respuesta de tu código original
+if hasattr(completion, 'choices') and len(completion.choices) > 0:
+choice_obj = completion.choices[0]if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
+response = choice_obj.message.content
+elif isinstance(choice_obj, dict) and 'message' in choice_obj:
+response = choice_obj['message']['content']
+elif hasattr(choice_obj, 'dict') and 'message' in choice_obj.dict:
+response = choice_obj.dict['message'].content
+else:
+response = str(choice_obj)
+else:
+response = str(completion)if "3317011786" in response or "no puedo darte una respuesta" in response:
+st.session_state.pregunta_pendiente = prompt
+st.session_state.mostrar_formulario = True
+st.markdown(response)
+st.session_state.messages.append({"role": "assistant", "content": response})
+st.rerun()
+else:
+st.markdown(response)
+st.session_state.messages.append({"role": "assistant", "content": response})
+except Exception as error:
+st.error(f"Error de conexión con el servidor de IA: {error}")
