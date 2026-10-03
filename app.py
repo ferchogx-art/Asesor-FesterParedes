@@ -16,7 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "llama-3.1-8b-instant"
+model_id = "llama-3.3-70b-versatile"
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
 if "messages" not in st.session_state:
@@ -276,9 +276,9 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
                 st.session_state.messages[-6:]
             )
 
-            # NUEVO MODELO ACTIVO: Cambiado a llama-3.1-8b-instant para solucionar el error 400
+            # MODELO OFICIAL DE PRODUCCIÓN EN GROQ: Llama 3.3 70B SpecDec
             completion = client.chat.completions.create(
-                model="llama-3.1-8b-instant",  # Reemplazo oficial vigente en Groq
+                model="llama-3.3-70b-specdec",  # Reemplazo garantizado y activo en la API
                 messages=historial_optimizado,
                 temperature=0.0,
                 max_tokens=800
@@ -286,7 +286,7 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
             
             # Extracción segura de la respuesta de texto plano
             if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                choice_obj = completion.choices[0] # Se corrigió a [0] para evitar errores de tipo lista
+                choice_obj = completion.choices[0]
                 if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
                     response = choice_obj.message.content
                 elif isinstance(choice_obj, dict) and 'message' in choice_obj:
