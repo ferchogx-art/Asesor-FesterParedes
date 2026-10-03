@@ -16,7 +16,7 @@ if not api_key:
     st.stop()
 
 client = Groq(api_key=api_key)
-model_id = "openai/gpt-oss-20b"  # El modelo de producción oficial activo en Groq para chat rápido
+model_id = "llama-3.1-8b-instant"
 
 # 2. Inicializar memorias de conversación y lecciones de la tienda
 if "messages" not in st.session_state:
@@ -268,26 +268,25 @@ Fester Paredes es distribuidor autorizado. Opciones de venta:
 Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con Fester Paredes al 3317011786'.
 """
 
-    with st.chat_message("assistant"):
+      with st.chat_message("assistant"):
         try:
-            # CAMBIO CLAVE: Enviamos el contexto del sistema + SOLO los últimos 6 mensajes del chat
-            # Esto evita que los tokens acumulados saturen la memoria de Groq por minuto (TPM)
+            # Enviamos el contexto del sistema + SOLO los últimos 6 mensajes del chat
             historial_optimizado = (
                 [{"role": "system", "content": contexto_sistema}] + 
                 st.session_state.messages[-6:]
             )
 
-            # CAMBIO CLAVE 2: Se migra a un modelo nativo y ultra eficiente de Groq para evitar bloqueos
+            # NUEVO MODELO ACTIVO: Cambiado a llama-3.1-8b-instant para solucionar el error 400
             completion = client.chat.completions.create(
-                model="llama3-8b-8192",  # Modelo estable y de alta capacidad de tokens en Groq
+                model="llama-3.1-8b-instant",  # Reemplazo oficial vigente en Groq
                 messages=historial_optimizado,
                 temperature=0.0,
                 max_tokens=800
             )
             
-            # Extracción segura de la respuesta
+            # Extracción segura de la respuesta de texto plano
             if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                choice_obj = completion.choices[0]
+                choice_obj = completion.choices[0] # Se corrigió a [0] para evitar errores de tipo lista
                 if hasattr(choice_obj, 'message') and hasattr(choice_obj.message, 'content'):
                     response = choice_obj.message.content
                 elif isinstance(choice_obj, dict) and 'message' in choice_obj:
@@ -297,7 +296,7 @@ Siempre que remitas a contacto usa: 'te recomiendo comunicarte directamente con 
             else:
                 response = str(completion)
 
-            # Lógica de detección de auxilio / aprendizaje técnico
+            # Lógica de detección de auxilio o aprendizaje en mostrador
             if "3317011786" in response or "no puedo darte una respuesta" in response:
                 st.session_state.pregunta_pendiente = prompt
                 st.session_state.mostrar_formulario = True
