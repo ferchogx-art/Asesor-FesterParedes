@@ -212,10 +212,10 @@ prompt_normalizado = normalizar_texto(prompt)
 # 1. Comprobar la Base de Datos Local de la Tienda (cerebro_tienda)
 respuesta_guardada = ""
 for clave_memoria, valor_memoria in st.session_state.cerebro_tienda.items():
-if clave_memoria in prompt_normalizado or prompt_normalizado in clave_memoria:
-respuesta_guardada = valor_memoria
-break
-if respuesta_guardada:
+    if clave_memoria in prompt_normalizado or prompt_normalizado in clave_memoria:
+    respuesta_guardada = valor_memoria
+    break
+    if respuesta_guardada:
 with st.chat_message("assistant"):
 st.markdown(respuesta_guardada)
 st.session_state.messages.append({"role": "assistant", "content": respuesta_guardada})
