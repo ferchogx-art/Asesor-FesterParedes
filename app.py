@@ -211,25 +211,25 @@ mensajes_para_api = st.session_state.messages.copy()
     # Si el usuario pregunta algo relacionado con cantidades o cálculo, la IA sabrá qué hay en la calculadora.
 mensajes_para_api = st.session_state.messages.copy()
 if any(k in normalizar_texto(prompt) for k in ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]):
-        mensajes_para_api.append({"role": "system", "content": f"El usuario podría estar buscando un cálculo físico. Contexto de la calculadora lateral activa: {calculo_actual_str}"})
+    mensajes_para_api.append({"role": "system", "content": f"El usuario podría estar buscando un cálculo físico. Contexto de la calculadora lateral activa: {calculo_actual_str}"})
 
-    # Llamada a la API de Groq conservando tu modelo original
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
+# Llamada a la API de Groq conservando tu modelo original
+with st.chat_message("assistant"):
+    message_placeholder = st.empty()
+    full_response = ""
+    
+    try:
+        completion = client.chat.completions.create(
+            model=model_id,
+            messages=mensajes_para_api,
+            stream=False
+        )
         
-        try:
-            completion = client.chat.completions.create(
-                model=model_id,
-                messages=mensajes_para_api,
-                stream=False
-            )
-            
-            full_response = completion.choices.message.content
-            message_placeholder.markdown(full_response)
-            
-            # MEJORA 4: Guardamos la respuesta del asistente en el historial global
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
-            
-        except Exception as e:
-            st.error(f"Error al conectar con Groq: {e}")
+        full_response = completion.choices.message.content
+        message_placeholder.markdown(full_response)
+        
+        # MEJORA 4: Guardamos la respuesta del asistente en el historial global
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        
+    except Exception as e:
+        st.error(f"Error al conectar con Groq: {e}")
