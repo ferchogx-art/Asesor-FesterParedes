@@ -210,7 +210,7 @@ mensajes_para_api = st.session_state.messages.copy()
 if any(k in normalizar_texto(prompt) for k in ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]):
 mensajes_para_api.append({"role": "system", "content": f"El usuario podría estar buscando un cálculo físico. Contexto de la calculadora lateral activa: {calculo_actual_str}"})
 # Llamada a la API de Groq conservando tu modelo original
-with st.chat_message("assistant"):
+    with st.chat_message("assistant"):
 message_placeholder = st.empty()
 full_response = ""
 try:
