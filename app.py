@@ -270,13 +270,15 @@ REGLA DE ORO: Recomienda basándote SOLO en la base de conocimientos adjunta. Si
 23. FESTER VAPORTITE 550: Impermeabilizante asfáltico base solvente de consistencia pastosa para sistemas multicapa en frío (barrera de vapor extrema). RENDIMIENTO: 1.0 Litro/m² por capa sola en losa; 2.0 Litros/m² en sistema multicapa con malla de refuerzo. REGLA: Altamente inflamable y tóxico
 """
 
+"""
+
     mensajes_para_api = [{"role": "system", "content": contexto_sistema}]
     
     for msg in st.session_state.messages:
         if msg["role"] != "system":
             mensajes_para_api.append(msg)
             
-     if any(k in prompt_normalizado for k in ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]):
+    if any(k in prompt_normalizado for k in ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]):
         mensajes_para_api.append({
             "role": "system", 
             "content": f"INFORMACIÓN DINÁMICA DE LA CALCULADORA LATERAL: El usuario está solicitando un cálculo de obra. Usa este dato exacto calculado en tiempo real en la interfaz para responderle: {calculo_actual_str}"
@@ -292,11 +294,11 @@ REGLA DE ORO: Recomienda basándote SOLO en la base de conocimientos adjunta. Si
                 stream=False
             )
             
-            full_response = completion.choices[0].message.content
+            full_response = completion.choices.message.content
             message_placeholder.markdown(full_response)
             
             st.session_state.messages.append({"role": "assistant", "content": full_response})
             
         except Exception as e:
             st.error(f"Error al conectar con Groq: {e}")
-
+   
