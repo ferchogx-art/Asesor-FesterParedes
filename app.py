@@ -202,21 +202,36 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Guardamos el mensaje del usuario en el historial
+        # Guardamos el mensaje del usuario en el historial
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    # Preparamos los mensajes para la API
-    mensajes_para_api = st.session_state.messages.copy()
+    # REESTRUCTURACIÓN: Forzamos las instrucciones del sistema en cada llamada
+    instrucciones_sistema = (
+        "Eres el Asesor Técnico Experto Oficial de FesterParedes. Tu propósito es guiar de forma "
+        "estricta y profesional a ingenieros, arquitectos y aplicadores utilizando únicamente "
+        "especificaciones, dosificaciones y normativas técnicas de los productos Fester. "
+        "Bajo ninguna circunstancia debes decir que eres un modelo genérico de OpenAI o Groq; "
+        "tú eres un sistema maestro unificado de Fester. Sé preciso, conciso y técnico en tus respuestas."
+    )
     
-    # Normalizamos el texto de forma simple para evitar fallos de regex en el bucle
+    # Creamos la lista de mensajes combinando la identidad con el historial acumulado
+    mensajes_para_api = [{"role": "system", "content": instrucciones_sistema}]
+    
+    # Añadimos el historial que se lleva en la sesión (limpiando posibles residuos previos)
+    for msg in st.session_state.messages:
+        if msg["role"] != "system":
+            mensajes_para_api.append(msg)
+    
+    # Inyección dinámica de la calculadora lateral
     texto_busqueda = prompt.lower().strip()
     palabras_clave = ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]
     
     if any(k in texto_busqueda for k in palabras_clave):
         mensajes_para_api.append({
             "role": "system", 
-            "content": f"El usuario podría estar buscando un cálculo físico. Contexto de la calculadora lateral activa: {calculo_actual_str}"
+            "content": f"El usuario está solicitando datos volumétricos o rendimientos en obra. Información de referencia exacta de la calculadora lateral activa: {calculo_actual_str}"
         })
+
 
     # Llamada a la API de Groq conservando tu modelo original
     with st.chat_message("assistant"):
