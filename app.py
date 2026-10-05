@@ -208,7 +208,8 @@ if prompt := st.chat_input("¿Qué producto deseas consultar o qué problema tie
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-prompt_normalizado = normalizar_texto(prompt)
+    prompt_normalizado = normalizar_texto(prompt)
+
     # 1. Comprobar la Base de Datos Local de la Tienda (cerebro_tienda)
     respuesta_guardada = ""
     for clave_memoria, valor_memoria in st.session_state.cerebro_tienda.items():
@@ -217,18 +218,21 @@ prompt_normalizado = normalizar_texto(prompt)
             break
 
     if respuesta_guardada:
-with st.chat_message("assistant"):
-st.markdown(respuesta_guardada)
-st.session_state.messages.append({"role": "assistant", "content": respuesta_guardada})
-st.stop()
-# 2. Control de Saludos Manuales de Confianza
-if prompt_normalizado in ["hola", "buenosdias", "buenasnoches", "buenastardes", "saludos", "quetal", "holis"]:
-res_saludo = "¡Hola! Soy tu Asesor Técnico FesterParedes, a la orden. ¿En qué problema de obra te puedo ayudar hoy?"
-with st.chat_message("assistant"):
-st.markdown(res_saludo)
-st.session_state.messages.append({"role": "assistant", "content": res_saludo})
-st.stop()
-mensaje_auxilio = "Con la información que tengo no puedo darte una respuesta 100% precisa sobre esto. Te recomiendo comunicarte directamente con Fester Paredes al 3317011786 para que un especialista te asesore. ¡Con gusto te seguimos ayudando con cualquier otra duda!"
+        with st.chat_message("assistant"):
+            st.markdown(respuesta_guardada)
+            st.session_state.messages.append({"role": "assistant", "content": respuesta_guardada})
+            st.stop()
+
+    # 2. Control de Saludos Manuales de Confianza
+    if prompt_normalizado in ["hola", "buenosdias", "buenasnoches", "buenastardes", "saludos", "quetal", "holis"]:
+        res_saludo = "¡Hola! Soy tu Asesor Técnico FesterParedes, a la orden. ¿En qué problema de obra te puedo ayudar hoy?"
+        with st.chat_message("assistant"):
+            st.markdown(res_saludo)
+            st.session_state.messages.append({"role": "assistant", "content": res_saludo})
+            st.stop()
+
+    mensaje_auxilio = "Con la información que tengo no puedo darte una respuesta 100% precisa sobre esto. Te recomiendo comunicarte directamente con Fester Paredes al 3317011786 para que un especialista te asesore. ¡Con gusto te seguimos ayudando con cualquier otra duda!"
+
 # === INSTRUCCIONES OPTIMIZADAS CONTRA BUCLES Y SATURACIÓN ===
 contexto_sistema = f"""
 Eres 'Fester Paredes', asesor técnico experto en impermeabilización en Zapopan, Jalisco. Siempre preséntate y responde diciendo: 'Soy tu asesor Fester Paredes a la orden, ¿en qué te podemos ayudar?'. Respondes en español, de forma amable, cercana y profesional.
