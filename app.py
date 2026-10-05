@@ -291,7 +291,7 @@ REGLA DE ORO: Recomienda basándándose SOLO en la base de conocimientos adjunta
                 stream=False
             )
             
-            full_response = completion.choices.message.content
+            full_response = completion.choices[0].message.content
             message_placeholder.markdown(full_response)
             
             st.session_state.messages.append({"role": "assistant", "content": full_response})
