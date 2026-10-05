@@ -229,7 +229,7 @@ if prompt:
                 stream=False
             )
             
-            full_response = completion.choices.message.content
+            full_response = completion.choices[0].message.content
             message_placeholder.markdown(full_response)
             
             # Guardamos la respuesta del asistente en el historial global
