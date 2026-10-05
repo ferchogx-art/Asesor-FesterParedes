@@ -276,19 +276,27 @@ REGLA DE ORO: Recomienda basándote SOLO en la base de conocimientos adjunta. Si
         if msg["role"] != "system":
             mensajes_para_api.append(msg)
             
-    if any(k in prompt_normalizado for k in ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]):
+     if any(k in prompt_normalizado for k in ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]):
         mensajes_para_api.append({
             "role": "system", 
+            "content": f"INFORMACIÓN DINÁMICA DE LA CALCULADORA LATERAL: El usuario está solicitando un cálculo de obra. Usa este dato exacto calculado en tiempo real en la interfaz para responderle: {calculo_actual_str}"
+        })
 
-"content": f"INFORMACIÓN DINÁMICA DE LA CALCULADORA LATERAL: El usuario está solicitando un cálculo de obra. Usa este dato exacto calculado en tiempo real en la interfaz para responderle: {calculo_actual_str}"
-})Llamada definitiva a la API de Groq con tu modelo permanente
-with st.chat_message("assistant"):
-message_placeholder = st.empty()try:
-completion = client.chat.completions.create(
-model=model_id,
-messages=mensajes_para_api,
-stream=False
-)full_response = completion.choices[0].message.content
-message_placeholder.markdown(full_response)# Guardar la respuesta del bot en la memoria de la sesión
-st.session_state.messages.append({"role": "assistant", "content": full_response})except Exception as e:
-st.error(f"Error al conectar con Groq: {e}")
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        
+        try:
+            completion = client.chat.completions.create(
+                model=model_id,
+                messages=mensajes_para_api,
+                stream=False
+            )
+            
+            full_response = completion.choices[0].message.content
+            message_placeholder.markdown(full_response)
+            
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            
+        except Exception as e:
+            st.error(f"Error al conectar con Groq: {e}")
+
