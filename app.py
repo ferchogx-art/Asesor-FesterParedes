@@ -185,10 +185,10 @@ with st.sidebar:
         calculo_actual_str += f" Equivalente a {sacos} sacos de 25kg."
 
 # =========================================================================
-# 💬 CENTRO DE LA PANTALLA: HISTORIAL DEL CHAT CON INTERACCIÓN REAL
+# 💬 CENTRO DE LA PANTALLA: HISTORIAL DEL CHAT CON INTELIGENCIA INTEGRADA
 # =========================================================================
 
-# Renderizar el historial de la sesión (ocultando el prompt del sistema)
+# Renderizar el historial de la sesión (ocultando las instrucciones de control del sistema)
 for message in st.session_state.messages:
     if message["role"] != "system":
         with st.chat_message(message["role"]):
@@ -202,38 +202,41 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
     
-        # Guardamos el mensaje del usuario en el historial
+    # Guardamos el mensaje del usuario en el historial para mantener la conversación
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    # REESTRUCTURACIÓN: Forzamos las instrucciones del sistema en cada llamada
+    # 🚨 INYECCIÓN ESTRICTA DEL PROMPT ORIGINAL Y SALUDO CORPORATIVO
     instrucciones_sistema = (
-        "Eres el Asesor Técnico Experto Oficial de FesterParedes. Tu propósito es guiar de forma "
-        "estricta y profesional a ingenieros, arquitectos y aplicadores utilizando únicamente "
-        "especificaciones, dosificaciones y normativas técnicas de los productos Fester. "
-        "Bajo ninguna circunstancia debes decir que eres un modelo genérico de OpenAI o Groq; "
-        "tú eres un sistema maestro unificado de Fester. Sé preciso, conciso y técnico en tus respuestas."
+        "Eres el Asesor Técnico Experto Oficial de Fester Paredes. Tu propósito es guiar con "
+        "absoluta precisión a ingenieros, arquitectos y aplicadores. "
+        "Siempre debes presentarte y actuar bajo tu identidad oficial diciendo: "
+        "'Soy tu asesor Fester Paredes a la orden, ¿en qué te podemos ayudar?'. "
+        "NOTAS DE CONTROL CRÍTICAS:\n"
+        "1. No inventes nombres de productos (está prohibido mencionar Fester P-500, Fester F-200, etc.).\n"
+        "2. Utiliza estrictamente las soluciones reales de la marca: Fester Acriton, Fester CR-65, "
+        "Fester CR-66 Fibre Force, Festerbond, Festergrout, Vaportite 550, Hidroprimer, o la gama CM (CM-200, CM-201, CM-202).\n"
+        "3. Sé sumamente profesional, técnico e institucional en cada respuesta."
     )
     
-    # Creamos la lista de mensajes combinando la identidad con el historial acumulado
+    # Inicializamos el paquete de datos para la API asegurando que las reglas vayan al inicio
     mensajes_para_api = [{"role": "system", "content": instrucciones_sistema}]
     
-    # Añadimos el historial que se lleva en la sesión (limpiando posibles residuos previos)
+    # Traspasamos el historial limpio acumulado en el navegador
     for msg in st.session_state.messages:
         if msg["role"] != "system":
             mensajes_para_api.append(msg)
-    
-    # Inyección dinámica de la calculadora lateral
+            
+    # Inyección dinámica de la calculadora si detecta palabras clave
     texto_busqueda = prompt.lower().strip()
     palabras_clave = ["cuanto", "necesito", "calcula", "rendimiento", "material", "cubetas", "sacos"]
     
     if any(k in texto_busqueda for k in palabras_clave):
         mensajes_para_api.append({
             "role": "system", 
-            "content": f"El usuario está solicitando datos volumétricos o rendimientos en obra. Información de referencia exacta de la calculadora lateral activa: {calculo_actual_str}"
+            "content": f"El usuario solicita apoyo con consumos o rendimientos. Datos reales calculados en la barra lateral activa: {calculo_actual_str}"
         })
 
-
-    # Llamada a la API de Groq conservando tu modelo original
+    # Llamada a la API de Groq consumiendo tu modelo de confianza
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
@@ -252,3 +255,4 @@ if prompt:
             
         except Exception as e:
             st.error(f"Error al conectar con Groq: {e}")
+
