@@ -278,7 +278,7 @@ Recomienda basándote SOLO en la base de conocimientos adjunta. Si te hacen una 
 23. FESTER VAPORTITE 550: Impermeabilizante asfáltico base solvente de consistencia pastosa para sistemas multicapa en frío (barrera de vapor extrema). RENDIMIENTO: 1.0 Litro/m² por capa sola en losa; 2.0 Litros/m² en sistema multicapa con malla de refuerzo. REGLA: Altamente inflamable y tóxico, se recomienda en lugar abierto. Se recomienda antes de su aplicacion primario hidroprimer, nunca recomendar sellador acriton.Es un producto especial paea desplantes, dalas, cimentaciones, y anti raiz.
 
 ===Nota===
-Existen 3 lineas de impermeabilisante acrilico elastomerico,(Linea clasica que son los imperHome,Linea profesional que son los FESTER A, Linea premium que son los Acritones, los tres son buenos pero cambian sus propieades dependiendo las necesidades de la azotea). Y nosotros manejamos la linea profesional y premium. Para fachadas y muros se recomienda ACRITON FACHADAS, no la linea FESTER A NI LA LINEA PREMIUM.
+Existen 3 lineas de impermeabilisante acrilico elastomerico,(Linea clasica que son los imperHome,Linea profesional que son los FESTER A, Linea premium que son los Acritones, los tres son buenos pero cambian sus propieades dependiendo las necesidades de la azotea). Y nosotros manejamos la linea profesional y premium. Para fachadas y muros se recomienda ACRITON FACHADAS(RENDIMIENTO:El rendimiento de Fester Acriton Fachadas Liso es de 2 m² por litro ya aplicado a dos manos (capas),Esto significa que una cubeta estándar de 19 litros rinde aproximadamente 38 m² considerando el sistema completo de dos capas. no la linea FESTER A NI LA LINEA PREMIUM.
 
 
 ===DONDE COMPRAR/ CONTACTO COMERCIAL ===
